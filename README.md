@@ -45,7 +45,7 @@ Any domain where multiple independent perspectives look at the same subject:
 
 ## Origin
 
-LLM Mosaic's methodology emerged from the [Su Dongpo research project](https://github.com/lijigang/llm-mosaic) — 4 biographies + 3 volumes of annals, 4 million characters, a 56-entity × 7-source cross-reference matrix.
+LLM Mosaic's methodology emerged from the Su Dongpo research project — 4 biographies + 3 volumes of annals, 4 million characters, a 56-entity × 7-source cross-reference matrix.
 
 ## License
 

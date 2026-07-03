@@ -6,6 +6,8 @@
 >
 > This is not a tool. This is a **way of seeing knowledge.**
 
+📖 [中文文档](LLM%20Mosaic_CN.md) | [English Full Document](LLM%20Mosaic_EN.md) | [中文 README](LLM%20Mosaic_README_CN.md)
+
 ---
 
 ## Standing on the Shoulders of Giants, Seeing What They Didn't

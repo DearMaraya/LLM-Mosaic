@@ -6,6 +6,8 @@
 >
 > 这不是一个工具。这是一种**看待知识的方式**。
 
+📖 [中文完整文档](LLM%20Mosaic_CN.md) | [English Full Document](LLM%20Mosaic_EN.md) | [English README](LLM%20Mosaic_README_EN.md)
+
 ---
 
 ## 站在巨人的肩膀上，看见他们没看的地方

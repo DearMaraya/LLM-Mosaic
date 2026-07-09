@@ -1,0 +1,4050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Mosaic从入门到精通</title>
+<style>
+/* 书籍级PDF — 共享CSS模板
+   基于焦橙主题设计系统
+
+   ⚠️ 边距规则（重要！避免重复出血）：
+   - @page margin：只控制上下边距（18mm），左右设为0
+   - .content padding：控制左右边距（55px）
+   - 不要在@page和HTML元素中同时设置左右边距，否则会叠加导致内容区过窄
+   - 封面(.cover)和尾页(.back-page)有独立的@page规则（margin:0），自行通过padding控制
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --text: #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --accent: #C2410C;
+  --accent-light: #FFF7ED;
+  --border: #E5E5E5;
+  --code-bg: #F5F5F0;
+  --tip-bg: #F0FDF4;
+  --tip-border: #22C55E;
+  --warn-bg: #FEF2F2;
+  --warn-border: #EF4444;
+  --section-line: #C2410C;
+  --highlight: #FFFBEB;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+@page {
+  size: A4;
+  margin: 18mm 0;  /* 左右边距由.content padding控制，这里只设上下 */
+}
+
+@page cover-page {
+  size: A4;
+  margin: 0;
+}
+
+@page back-page {
+  size: A4;
+  margin: 0;
+}
+
+body {
+  font-family: 'Noto Sans SC', 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.8;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* ==================== Cover ==================== */
+
+.cover {
+  page: cover-page;
+  page-break-after: always;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 55px;
+  background: linear-gradient(135deg, #FFFBF5 0%, #FFF5EB 25%, #FFFFFF 100%);
+  position: relative;
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 50px;
+  width: 80px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+.cover::after {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 140px;
+  width: 30px;
+  height: 5px;
+  background: #FDBA74;
+  border-radius: 3px;
+}
+
+.cover-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 3px;
+  margin-bottom: 24px;
+  font-family: 'Inter', sans-serif;
+}
+
+.cover h1 {
+  font-size: 36pt;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.cover h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.cover-subtitle {
+  font-size: 14pt;
+  font-weight: 300;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.cover-en {
+  font-family: 'Inter', sans-serif;
+  font-size: 11pt;
+  color: #9CA3AF;
+  font-weight: 400;
+  font-style: italic;
+  margin-bottom: 50px;
+}
+
+.cover-meta {
+  font-size: 9.5pt;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  line-height: 2;
+}
+
+.cover-meta strong { color: var(--text); font-weight: 600; }
+
+.cover-author {
+  margin-top: 20px;
+  font-size: 10pt;
+  color: var(--text-secondary);
+  line-height: 2;
+}
+
+.cover-author strong {
+  font-size: 12pt;
+  color: var(--text);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.cover-author a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.cover-disclaimer {
+  margin-top: 14px;
+  font-size: 8.5pt;
+  color: #9CA3AF;
+  line-height: 1.8;
+}
+
+.cover-exclusive {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: var(--accent-light);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  font-size: 9pt;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+/* ==================== TOC ==================== */
+
+.toc {
+  page-break-after: always;
+  padding: 10px 55px 0;
+}
+
+.toc h2 {
+  font-size: 22pt;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.toc-sub {
+  font-size: 10pt;
+  color: var(--text-secondary);
+  margin-bottom: 30px;
+}
+
+.toc-group {
+  margin-top: 20px;
+  margin-bottom: 6px;
+  font-size: 10pt;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px dotted #D4D4D4;
+  font-size: 10.5pt;
+}
+
+.toc-item .num {
+  color: var(--accent);
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  margin-right: 10px;
+  min-width: 24px;
+  font-size: 10pt;
+}
+
+.toc-item .title { font-weight: 500; }
+
+.toc-item .en {
+  font-family: 'Inter', sans-serif;
+  font-size: 9pt;
+  color: #9CA3AF;
+  margin-left: 8px;
+  font-weight: 400;
+}
+
+.toc-item a {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* ==================== Content ==================== */
+
+.content {
+  padding: 0 55px;
+}
+
+h2.section-title {
+  font-size: 20pt;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 45px;
+  margin-bottom: 6px;
+  padding-top: 18px;
+  border-top: 3px solid var(--section-line);
+  page-break-after: avoid;
+}
+
+h2.section-title .num {
+  color: var(--accent);
+  font-family: 'Inter', sans-serif;
+  margin-right: 6px;
+  font-size: 18pt;
+}
+
+.section-en {
+  font-family: 'Inter', sans-serif;
+  font-size: 10pt;
+  color: #9CA3AF;
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+.section-intro {
+  font-size: 11.5pt;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  font-weight: 300;
+}
+
+h3 {
+  font-size: 13pt;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 24px;
+  margin-bottom: 8px;
+  page-break-after: avoid;
+}
+
+h3 .en {
+  font-family: 'Inter', sans-serif;
+  font-size: 9.5pt;
+  color: #9CA3AF;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+h4 {
+  font-size: 11pt;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 16px;
+  margin-bottom: 6px;
+}
+
+p { margin-bottom: 10px; }
+
+/* ==================== Components ==================== */
+
+/* Tip */
+.tip {
+  background: var(--tip-bg);
+  border-left: 4px solid var(--tip-border);
+  padding: 12px 16px;
+  margin: 14px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+.tip::before {
+  content: '核心建议';
+  display: block;
+  font-weight: 700;
+  font-size: 8.5pt;
+  letter-spacing: 0.5px;
+  color: #16A34A;
+  margin-bottom: 3px;
+}
+
+/* Warning */
+.warning {
+  background: var(--warn-bg);
+  border-left: 4px solid var(--warn-border);
+  padding: 12px 16px;
+  margin: 14px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+.warning::before {
+  content: '注意';
+  display: block;
+  font-weight: 700;
+  font-size: 8.5pt;
+  letter-spacing: 0.5px;
+  color: #DC2626;
+  margin-bottom: 3px;
+}
+
+/* Callout */
+.callout {
+  background: var(--highlight);
+  border: 1px solid #FDE68A;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 14px 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+.callout strong { color: var(--accent); }
+
+/* Code */
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9pt;
+  line-height: 1.6;
+  margin: 10px 0 14px;
+  page-break-inside: avoid;
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9pt;
+  background: var(--code-bg);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+pre code { background: none; padding: 0; }
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 9.5pt;
+  page-break-inside: avoid;
+}
+
+thead th {
+  background: #F5F5F0;
+  font-weight: 600;
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 2px solid var(--border);
+  font-size: 8.5pt;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* Steps */
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 14px 0;
+  page-break-inside: avoid;
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  margin-top: 2px;
+}
+
+.step-content { flex: 1; }
+.step-content h4 {
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 5px;
+  font-size: 10.5pt;
+  line-height: 1.6;
+}
+
+/* Lists */
+ul, ol { margin: 6px 0 12px 22px; }
+li { margin-bottom: 3px; }
+
+em { font-style: italic; color: var(--text-secondary); }
+strong { font-weight: 600; }
+
+.page-break { page-break-before: always; }
+
+/* File tree */
+.file-tree {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9pt;
+  line-height: 1.7;
+  margin: 10px 0 14px;
+  page-break-inside: avoid;
+}
+
+/* Flow diagram */
+.flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.flow-item {
+  background: white;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 10pt;
+  color: var(--accent);
+}
+
+.flow-arrow {
+  color: #D1D5DB;
+  font-size: 18pt;
+  font-weight: 300;
+}
+
+/* Compare box */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 14px 0;
+  page-break-inside: avoid;
+}
+
+.compare-good, .compare-bad {
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 9.5pt;
+}
+
+.compare-good {
+  background: var(--tip-bg);
+  border: 1px solid #BBF7D0;
+}
+
+.compare-good::before {
+  content: '推荐';
+  display: block;
+  font-weight: 700;
+  font-size: 8.5pt;
+  color: #16A34A;
+  margin-bottom: 4px;
+}
+
+.compare-bad {
+  background: var(--warn-bg);
+  border: 1px solid #FECACA;
+}
+
+.compare-bad::before {
+  content: '不推荐';
+  display: block;
+  font-weight: 700;
+  font-size: 8.5pt;
+  color: #DC2626;
+  margin-bottom: 4px;
+}
+
+.compare-good pre, .compare-bad pre {
+  margin: 6px 0 0;
+  font-size: 8.5pt;
+}
+
+/* Diagram placeholder */
+.diagram {
+  background: #F9FAFB;
+  border: 2px dashed #D1D5DB;
+  border-radius: 12px;
+  padding: 30px;
+  margin: 20px 0;
+  text-align: center;
+  color: #9CA3AF;
+  font-size: 9pt;
+  page-break-inside: avoid;
+}
+
+.diagram .label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-size: 10pt;
+}
+
+/* ==================== Footer ==================== */
+
+.footer-note {
+  margin-top: 50px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: 8.5pt;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* ==================== Back page ==================== */
+
+.back-page {
+  page: back-page;
+  page-break-before: always;
+  page-break-inside: avoid;
+  page-break-after: avoid;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 55px 40px;
+  background: linear-gradient(135deg, #FFFBF5 0%, #FFF5EB 25%, #FFFFFF 100%);
+  text-align: center;
+}
+
+.back-page-title {
+  font-size: 22pt;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.back-page-subtitle {
+  font-size: 12pt;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+}
+
+.back-page-qr-wrapper {
+  background: white;
+  padding: 16px;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+  display: inline-block;
+}
+
+.back-page-qr {
+  width: 220px;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+}
+
+.back-page-info {
+  font-size: 9.5pt;
+  color: var(--text-secondary);
+  line-height: 1.9;
+  max-width: 400px;
+}
+
+.back-page-info strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.back-page-link {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 9px 24px;
+  background: var(--accent);
+  color: white;
+  font-size: 10pt;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.back-page-social {
+  margin-top: 18px;
+  font-size: 9.5pt;
+  color: var(--text-secondary);
+  line-height: 2;
+}
+
+.back-page-social a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-page-social .social-sep {
+  margin: 0 8px;
+  color: #D1D5DB;
+}
+
+.back-page-footer {
+  margin-top: 28px;
+  font-size: 8.5pt;
+  color: #B0B0B0;
+  line-height: 1.8;
+  letter-spacing: 0.5px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ===== 00-cover.html ===== -->
+<div class="cover">
+  <div class="cover-badge">橙皮书系列</div>
+  <h1><em>LLM Mosaic</em><br>从入门到精通</h1>
+  <p class="cover-subtitle">用大语言模型做多源互证的知识组织模式——汇集，不编译。让 AI 帮你把不同来源的说法一字排开，差异标注、逐条溯源，把判断权留给你自己。</p>
+  <p class="cover-en">LLM Mosaic: A Multi-Source Knowledge Organization Methodology</p>
+  <div class="cover-meta">
+    <strong>适用场景：</strong>历史研究 · 法律判例 · 竞品分析 · 文学批评 · 多国视角<br>
+    <strong>核心工具：</strong>Obsidian + Claude Code + Claudian<br>
+    <strong>文档版本：</strong>v260709<br>
+    <strong>发布时间：</strong>2026-07-09 (build #1)</div>
+  <div class="cover-author"><strong>亲爱的马拉亚</strong><br>亲爱的马拉亚</div>
+  <div class="cover-disclaimer">本书内容仅供参考，不构成任何专业建议。书中涉及的外部工具、产品名称归各自权利人所有。</div>
+</div>
+
+<!-- ===== 01-toc.html ===== -->
+<div class="toc">
+  <div style="border-top: 3px solid var(--accent); margin-bottom: 20px;"></div>
+  <h2>目录</h2>
+  <div class="toc-sub">CONTENTS</div>
+
+  <div class="toc-group">Part 1: 认知篇 · 为什么需要 LLM Mosaic</div>
+  <div class="toc-item"><a href="#part1"><span class="num">§01</span><span class="title">LLM 时代的知识管理新范式</span></a></div>
+  <div class="toc-item"><a href="#part2"><span class="num">§02</span><span class="title">LLM Mosaic 核心理念：汇集，不编译</span></a></div>
+  <div class="toc-item"><a href="#part3"><span class="num">§03</span><span class="title">LLM Wiki vs LLM Mosaic：何时用哪个</span></a></div>
+
+  <div class="toc-group">Part 2: 架构篇 · LLM Mosaic 怎么工作</div>
+  <div class="toc-item"><a href="#part4"><span class="num">§04</span><span class="title">三层架构详解</span></a></div>
+  <div class="toc-item"><a href="#part5"><span class="num">§05</span><span class="title">实体 × 来源矩阵：Mosaic 的总控台</span></a></div>
+  <div class="toc-item"><a href="#part6"><span class="num">§06</span><span class="title">逐条溯源与块级引用</span></a></div>
+
+  <div class="toc-group">Part 3: 工具篇 · 搭建你的 Mosaic 工作台</div>
+  <div class="toc-item"><a href="#part7"><span class="num">§07</span><span class="title">工具链全景：Obsidian + Claude Code + Agent</span></a></div>
+  <div class="toc-item"><a href="#part8"><span class="num">§08</span><span class="title">原始资料入库管线</span></a></div>
+  <div class="toc-item"><a href="#part9"><span class="num">§09</span><span class="title">块级引用实战：埋法与格式</span></a></div>
+
+  <div class="toc-group">Part 4: 实战篇 · 从零开始建一个 Mosaic</div>
+  <div class="toc-item"><a href="#part10"><span class="num">§10</span><span class="title">第一步：收集资料与全量扫描</span></a></div>
+  <div class="toc-item"><a href="#part11"><span class="num">§11</span><span class="title">第二步：编译 Mosaic 页面</span></a></div>
+  <div class="toc-item"><a href="#part12"><span class="num">§12</span><span class="title">第三步：查询、维护与持续更新</span></a></div>
+
+  <div class="toc-group">Part 5: 案例篇 · 四种典型场景</div>
+  <div class="toc-item"><a href="#part13"><span class="num">§13</span><span class="title">案例一：苏东坡研究（历史传记）</span></a></div>
+  <div class="toc-item"><a href="#part14"><span class="num">§14</span><span class="title">案例二：法律判例分析</span></a></div>
+  <div class="toc-item"><a href="#part15"><span class="num">§15</span><span class="title">案例三：竞品情报分析</span></a></div>
+  <div class="toc-item"><a href="#part16"><span class="num">§16</span><span class="title">案例四：文学批评与多视角解读</span></a></div>
+
+  <div class="toc-group">Part 6: 进阶篇 · 规模化与最佳实践</div>
+  <div class="toc-item"><a href="#part17"><span class="num">§17</span><span class="title">从 3 个来源到 30 个：矩阵的复利效应</span></a></div>
+  <div class="toc-item"><a href="#part18"><span class="num">§18</span><span class="title">Lint 审计与质量保障</span></a></div>
+</div>
+
+<!-- ===== part00-preface.html ===== -->
+<div class="content">
+
+<h2 class="section-title page-break" id="preface"><span class="num">序</span> 言</h2>
+<p class="section-en">Preface</p>
+
+<p>你好，我是亲爱的马拉亚。</p>
+
+<p>写这本书的念头，是在我用 AI 读完四本苏东坡传记之后冒出来的。</p>
+
+<p>四本传记，四位作者，四个年代，四种立场。林语堂笔下的王安石是个偏执狂，李一冰笔下的王安石是个理想主义改革家。沈括是始作俑者还是被冤枉的？乌台诗案是政治斗争还是文化冲突？同一段历史，同一个苏轼，每个人讲的都不一样。</p>
+
+<p>我问 AI：「综合来看，王安石是个怎样的人？」AI 给了我一段四平八稳的回答——「他是一个复杂的历史人物，既有改革的远见，也有性格的缺陷……」</p>
+
+<p>这句话没错。但它抹掉了最精彩的张力。它让我看不见林语堂和李一冰之间的分歧，看不见周文翰和祝勇之间的碰撞。它用自己的「综合」把四本书的差异压扁成了一团灰色的共识。</p>
+
+<p>我突然意识到一个问题：<strong>当一件事有多个独立来源的独立判断，这些判断之间的差异本身就是最有价值的信息。但传统 LLM 工作流的设计目标恰恰是消除这些差异。</strong></p>
+
+<p>这就是 LLM Mosaic 的起点。</p>
+
+<p>LLM Mosaic 是一种用大语言模型对同一主题的多份独立来源做<strong>并列呈现、差异标注、逐条溯源</strong>的知识组织模式。它的核心原则只有一条：汇集，不编译。把每一份来源对同一实体的说法一字排开，保持原貌，不合并，不替读者判断。每条说法后面跟一个链接，点一下跳回原文的精确位置。</p>
+
+<p>这不是「不信任 AI」——这是承认有些问题的价值在于视角的并存，而非答案的统一。</p>
+
+<p>Karpathy 提出的 LLM Wiki 解决了「让 AI 持续构建和维护知识库」的问题。LLM Mosaic 在此基础上解决了一个更具体的问题：「当你的信息来源不是一本教材，而是多个彼此矛盾的独立视角时，知识该怎么组织？」</p>
+
+<p>这本书里，我会带你从理念到工具，从零搭建一个 LLM Mosaic。如果你研究历史、分析判例、做竞品调研，或者任何需要「看清同一事物的多个版本」的场景——我希望它能帮到你。</p>
+
+<p>我们开始吧。</p>
+
+<p style="text-align: right; color: var(--text-secondary); margin-top: 30px;">亲爱的马拉亚<br>2026 年 7 月</p>
+
+</div>
+
+<!-- ===== part00-introduction.html ===== -->
+<div class="content">
+
+<h2 class="section-title page-break" id="intro"><span class="num">前</span> 言</h2>
+<p class="section-en">Introduction</p>
+
+<p>这本书分六个部分，从「为什么」到「怎么做」再到「做更好」，按学习曲线组织。</p>
+
+<p><strong>第一部分（认知篇）</strong>讲的是理念。为什么传统的检索式知识管理不够用？LLM Mosaic 的「汇集不编译」到底是什么意思？它和 Karpathy 的 LLM Wiki 是什么关系？读完这三章，你能判断你的场景适不适合用 Mosaic。</p>
+
+<p><strong>第二部分（架构篇）</strong>拆解三层结构。原始资料层、Mosaic 页面层、产出层各自做什么？entity-index 矩阵为什么是总控台？块级引用怎么做到「点一下跳回原文」？这三章是理解整个系统运转逻辑的关键。</p>
+
+<p><strong>第三部分（工具篇）</strong>讲的是具体操作。Obsidian 怎么配置？Claude Code 怎么和 Obsidian 联动？EPUB/PDF/网页怎么转成可用的 Markdown 原料？块级引用的编号体系怎么设计？全是实操，读完就能动手。</p>
+
+<p><strong>第四部分（实战篇）</strong>带你从零开始建一个 Mosaic。收集资料、全量扫描、编译页面、差异标注、持续更新。每一步都有模板和示例。</p>
+
+<p><strong>第五部分（案例篇）</strong>展示四种典型场景的完整 Mosaic 页面——苏东坡历史研究、法律判例分析、竞品情报对比、文学批评多视角解读。看完这几个案例，你能直接把模式套用到自己的领域。</p>
+
+<p><strong>第六部分（进阶篇）</strong>解决规模化问题。当你从 3 个来源扩展到 30 个来源，矩阵的威力开始指数增长。Lint 审计帮你持续保障质量——差异标注是否完整？溯源链接是否有效？新来源有没有及时回刷？</p>
+
+<p><strong>适合谁读？</strong></p>
+
+<ul>
+  <li>做历史研究、人物研究的学者和学生</li>
+  <li>需要多源情报分析的分析师</li>
+  <li>做法律判例研究的法律从业者</li>
+  <li>做文学批评、艺术评论的研究者</li>
+  <li>任何需要「看清同一事物的多个版本」的知识工作者</li>
+</ul>
+
+<p>你不需要会编程。如果你能在 Obsidian 里写 Markdown、在终端里敲一行命令，就够了。AI 会帮你完成剩下的。</p>
+
+<p style="text-align: right; color: var(--text-secondary); margin-top: 30px;">亲爱的马拉亚<br>2026 年 7 月</p>
+
+</div>
+
+<!-- ===== part01-cognition.html ===== -->
+<div class="content">
+
+<h2 class="section-title page-break" id="part1"><span class="num">§01</span> LLM 时代的知识管理新范式</h2>
+<p class="section-en">A New Paradigm for Knowledge Management in the LLM Era</p>
+<p class="section-intro">你攒了一堆资料，AI 能做的远不止"帮我搜一下"。本节带你重新理解 LLM 如何改变我们组织知识的方式。</p>
+
+<h3>场景：10 篇文章，一座金矿</h3>
+
+<p>假设你对"大语言模型的幻觉问题"产生了兴趣。你在微信里收藏了三篇公众号文章，在 Twitter 上 bookmark 了两个长线程，浏览器书签里躺着两篇论文、一篇博客、一个 GitHub 仓库的 README，还有一个两小时的 YouTube 视频。</p>
+
+<p>10 个来源，横跨文本、代码、视频字幕。你知道它们都在讲同一件事，但每篇的角度不同——有的是学术界综述，有的是工业界踩坑记录，有的是产品经理的方法论。它们之间存在共识，也存在微妙的争议。</p>
+
+<p>现在我问你：这 10 个来源看完，你能在三分钟内跟同事讲清楚"幻觉问题到底有哪些主流解法"吗？</p>
+
+<p>绝大多数人的答案是：不能。因为你的"读"和你的"用"之间隔着一道鸿沟——你读完会忘，你收藏了会觉得"以后再看"，你的知识散落在十几个平台上，彼此之间唯一的连接，是你那颗记不清太多细节的大脑。</p>
+
+<div class="callout"><strong>要点：</strong>问题的本质不是"信息不够"，而是"信息在，但组织不起来"。LLM 改变了这个局面——但不是以你以为的方式。</div>
+
+<h3>RAG 的承诺，以及它做不到的事</h3>
+
+<p>很多人第一次接触"AI + 知识管理"，接触到的就是 RAG（Retrieval-Augmented Generation，检索增强生成）。它的逻辑很直观：把你所有的文档喂进去，每次提问时，系统先从文档里检索最相关的几段，然后让 LLM 基于这些片段回答。</p>
+
+<p>听起来完美。但用过的人都知道问题在哪：</p>
+
+<p><strong>每次查询都是一次性消费。</strong>你问"幻觉问题有哪些解法"，RAG 检索几段文本，给出一个回答。下一篇对话，这个上下文就消失了。你问"刚才提到的 RLAIF 具体怎么做"，它重新检索一次，可能找到完全不同的几段，回答的连贯性看运气。</p>
+
+<p><strong>有检索，没积累。</strong>你反复问了 20 个关于幻觉的问题，RAG 每个都答了，但 20 个问答之间发生了什么？什么都没有。你拥有一堆聊天记录，但没有一个可以反复查阅、不断更新的知识结构。就像你在图书馆里借了 20 本书，每次都翻到相关的几页读完就还掉——一个月后你不敢说自己"搞懂了这个领域"。</p>
+
+<p><strong>零组织。</strong>RAG 没有"整理"的概念。它帮你找信息，但绝不帮你把信息之间的关系搞清楚。你的 10 篇文章之间存在引用、矛盾、互补——RAG 看不见。</p>
+
+<div class="compare">
+<div class="compare-good"><strong>RAG 擅长</strong>：快速查询、事实问答、在大量文档中定位具体信息</div>
+<div class="compare-bad"><strong>RAG 不擅长</strong>：知识积累、结构化整理、跨文档关系的发现</div>
+</div>
+
+<h3>Karpathy 的洞见：从"检索"到"编译"</h3>
+
+<p>Andrej Karpathy（前特斯拉 AI 总监、OpenAI 联合创始人）在一次分享中提出了一个概念："<strong>LLM Wiki</strong>"。他描述了一个流程：把你想要掌握的信息一股脑喂给 LLM，让 LLM 像一个编辑一样，把散落的信息"编译"成结构化的维基百科式页面——有标题层级、有交叉引用、有清晰的叙事逻辑。</p>
+
+<p>他给这个流程起了三个动词：<strong>Ingest</strong>（摄入）、<strong>Query</strong>（查询）、<strong>Lint</strong>（校验）。</p>
+
+<p>Karpathy 的比喻很精准：RAG 是"快问快答"，LLM Wiki 是"编教材"。前者的产物是一次性的；后者的产物是<strong>可积累的</strong>。你今天对某个话题的理解写进 Wiki 的一个页面，明天读到新东西，更新这个页面——页面在进化，你的知识也在进化。</p>
+
+<p>这个想法在 AI 圈引发了不小的讨论。它的吸引力在于：它把 LLM 从"信息搬运工"变成了"知识编辑"，让你从"反复搜索"的循环中跳出来，拥有一个真正在不断生长的知识系统。</p>
+
+<div class="tip"><strong>类比：</strong>RAG 就像你每次去图书馆，管理员帮你从书架上抽几本书翻到相关页码；LLM Wiki 就像你雇了一个研究助理，他通读所有资料后，给你写了一份带目录的综述报告，而且可以随时更新。</div>
+
+<h3>LLM Wiki 的三层架构</h3>
+
+<p>要把 LLM Wiki 的概念落地，实际上涉及三层结构：</p>
+
+<table>
+<tr><th>层级</th><th>角色</th><th>内容</th><th>类比</th></tr>
+<tr><td><strong>原料层</strong></td><td>Raw Materials</td><td>你收集的原始资料：文章、视频字幕、论文、群聊记录</td><td>图书馆</td></tr>
+<tr><td><strong>维基层</strong></td><td>Wiki Layer</td><td>LLM 从原料中提取、重组后的结构化页面，按"一本在线百科全书"的方式组织</td><td>维基百科</td></tr>
+<tr><td><strong>说明书层</strong></td><td>Guide Layer</td><td>基于维基层内容，针对你的具体使用场景生成的"操作手册"</td><td>使用说明书</td></tr>
+</table>
+
+<p>举个例子。你在研究"用 Rust 写 CLI 工具"：</p>
+
+<ul>
+<li><strong>原料层</strong>：10 篇博客、Rust 官方文档中跟 CLI 相关的 5 个章节、3 个开源项目的 README、一个 YouTube 教程的字幕。</li>
+<li><strong>维基层</strong>：LLM 消化所有原料后，生成一个"Rust CLI 开发知识库"——包含"参数解析的几种方案"、"错误处理的最佳实践"、"跨平台编译的注意事项"等页面，彼此交叉引用。</li>
+<li><strong>说明书层</strong>：你的需求是"写一个能在 macOS 和 Linux 上运行的 todo list CLI 工具"。LLM 从维基层中提取最相关的部分，生成一份针对性的操作指南：先做什么、后做什么、每步的关键代码和注意事项。</li>
+</ul>
+
+<p>三层之间的流动是单向的：原料→维基→说明书。但维基层的核心价值在于<strong>它是可以反复使用的</strong>。下次你想写另一个 CLI 工具，不用从头开始——维基层已经沉淀了你在 CLI 开发上的所有知识和经验。</p>
+
+<h3>三个核心操作：Ingest / Query / Lint</h3>
+
+<p>LLM Wiki 的日常使用，本质上就是三个动词的循环：</p>
+
+<div class="flow">
+<div class="flow-item"><strong>Ingest</strong><br/>摄入新资料</div>
+<div class="flow-arrow">→</div>
+<div class="flow-item"><strong>Query</strong><br/>查询知识库</div>
+<div class="flow-arrow">→</div>
+<div class="flow-item"><strong>Lint</strong><br/>审查、修正、更新</div>
+<div class="flow-arrow">→</div>
+<div class="flow-item"><strong>Ingest</strong><br/>继续摄入…</div>
+</div>
+
+<p><strong>Ingest（摄入）</strong>不是简单的"丢进去"。好的 Ingest 要带着意图：这份资料对我已有的知识结构有什么贡献？它补全了哪块空白？它跟我已有的某个结论产生冲突了吗？</p>
+
+<p><strong>Query（查询）</strong>是这套系统的核心价值——你不再向杂乱的原始文档查询，而是向一个已经整理好的、有结构的维基知识库查询。这就像你用 Wikipedia 查东西和你用 Google 搜一堆网页的区别。</p>
+
+<p><strong>Lint（校验）</strong>是 Karpathy 最被低估的洞见。LLM 会犯错——它会"幻觉"出一个不存在的方法名，会把两个不相关的概念拼接在一起。Lint 的意思是：你不能把 LLM 生成的 Wiki 当作"真理"，你必须像审查代码一样审查它——检查事实、追问来源、标记存疑点。</p>
+
+<div class="warning"><strong>关键提醒：</strong>LLM Wiki 中的"知识"是 LLM 加工过的，不是原始资料本身。如果你把 LLM 的输出当金科玉律，你就在用"系统性的幻觉"替代"偶发的幻觉"。Lint 这步不能省。</div>
+
+<h3>LLM Wiki 解决的问题，和没解决的问题</h3>
+
+<p>LLM Wiki 解决了 RAG 最大的短板：<strong>从"一次性查询"到"可积累的知识组织"</strong>。它让你面对的不是一堆聊天记录，而是一本不断增厚的、带目录的参考书。</p>
+
+<p>但它也带着一个隐含假设。这个假设在 Ingest 这一步就写进去了：<strong>LLM 负责"编译"，也就是提取、综合、归纳、去重。</strong></p>
+
+<p>"编译"这个词听起来美好，直到你面对这样一种情况——</p>
+
+<p>你收集的 10 个来源，彼此之间<strong>有矛盾</strong>。它们不是同一本教材的不同章节，而是 10 个独立的作者，带着各自的立场、方法论和数据，在讨论同一个话题。当它们意见不一致时，LLM 的"编译"会做什么？它会找出"最大公约数"，或者更糟——它会选一个它觉得"看起来更合理"的版本，把另一个直接丢掉。</p>
+
+<p>这个操作，在 90% 的场景下没问题。但在剩下 10% 的场景中，被丢掉的东西恰好事关重大。</p>
+
+<p>什么时候会出现这种情况？当你的信息来源不是<strong>教材</strong>，而是<strong>视角</strong>时。</p>
+
+</div>
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part2"><span class="num">§02</span> LLM Mosaic 核心理念：汇集，不编译</h2>
+<p class="section-en">Core Philosophy: Assemble, Don't Compile</p>
+<p class="section-intro">当多个来源彼此矛盾，"综合"就是"抹平偏差"。LLM Mosaic 换了一种做法：保留每个视角的独立性，让你自己来做判断。</p>
+
+<h3>当"编译"变成"抹平"</h3>
+
+<p>我们回到上一节那个 10 篇文章的场景。但这次，我们往里面加点料：</p>
+
+<p>你在研究大语言模型的幻觉问题，收集的资料包括 OpenAI 的技术报告、DeepMind 的论文、Anthropic 的安全研究、两个独立研究者的博客、以及一位批评 AI 叙事过热的教授的评论文章。</p>
+
+<p>如果你让 LLM Wiki 去"编译"这些资料，结果可能是：生成一个干净整洁的页面，标题是"幻觉问题的成因与缓解方法"，内容把各家的观点打磨成一致的叙述，矛盾被"综合"掉了。报告的结尾可能是："目前业界的主流共识是用 RLHF（基于人类反馈的强化学习）来减少幻觉……"</p>
+
+<p>但这不是真相。</p>
+
+<p>真相是：OpenAI 和 Anthropic 在 RLHF 的效果上存在方法论的争论；那位教授认为整个"RLHF 减少幻觉"的叙事就是在用一个黑箱修另一个黑箱；独立研究者指出，某些 benchmarks 上的"幻觉降低"实际上是模型学会了更巧妙地回避问题，而不是真的更诚实。</p>
+
+<p>这些冲突，在"编译"的过程中被擦除了。因为 LLM 的默认倾向是寻求自洽的叙述——它不喜欢矛盾，它会不自觉地把一个多元的、混乱的、充满张力的知识图景，压扁成一张光滑无褶的海报。</p>
+
+<div class="callout"><strong>要点：</strong>当你处理的材料是"教材"时，"编译"是合理的——教材本身就已经是经过整理的、结论稳定的知识。但当你处理的材料是"视角"时，"编译"就是"篡改"——它用一个虚构的共识覆盖了真实的多元性。</div>
+
+<h3>四个"编译会坏事"的典型场景</h3>
+
+<p>LLM Wiki 的"编译"逻辑不是 bug——它在 90% 的场景下是 feature。但下面这四个场景，你需要特别小心：</p>
+
+<h4>场景一：历史传记</h4>
+<p>你在研究苏东坡的生平。你手头的资料有林语堂的《苏东坡传》、王水照的学术论文、李一冰的现代传记、以及几篇不同的学术考证。林语堂笔下苏东坡是"无可救药的乐天派"，王水照强调的是他仕途起落中的政治智慧，李一冰更关注他诗歌创作背后的心理状态。三个版本都是真的，但切入角度完全不同。如果你让 LLM 去"编译"出一个"苏东坡生平综述"，你就会得到一个平庸的、四平八稳的百科词条——它每一个字都对，但没有一个字的苏东坡是活的。</p>
+
+<h4>场景二：法律判例</h4>
+<p>你在研究一个法律问题，收集了 5 个不同法院的判例。两个判例支持你的理解，两个判例看似相反但其实事实不同，一个判例暧昧不清。如果你让 LLM"综合"出一个结论，它可能会告诉你"虽然有争议但主流观点支持某某立场"——但法律上，"争议本身就是信息"。一个有经验的律师不会要一个"综合"，他要的是"这五个 case 各自说了什么，差异在哪里，为什么不同"。</p>
+
+<h4>场景三：竞品分析</h4>
+<p>你在做一个新产品的市场调研，收集了 8 个竞品的资料——官网、用户评价、第三方评测、技术博客。每个竞品吹的东西不一样，用户骂的方向也不同。你需要的不是 LLM 给你一个"综上所述，竞品市场整体如何如何"的结论。你要的是一个表格：A 产品的核心技术路线、B 产品的定价策略、C 产品的社区生态——每一个都完整保留自己的声音，不做美化、不做平衡。</p>
+
+<h4>场景四：文学批评</h4>
+<p>你在研究《红楼梦》的解读，手头有王国维的悲剧说、胡适的自传说、余英时的两个世界论、还有当代的性别批评和阶级分析。每一个流派看到的《红楼梦》是天壤之别的。如果 LLM"编译"出一个"《红楼梦》研究综述"，把所有人的观点摊成一张大饼，那个大饼上没有一块是有味道的——因为你吃下的是"某些学者认为"，而不是"王国维说 / 胡适说"。</p>
+
+<div class="tip"><strong>一个简单的判断标准：</strong>当你本能地想说出"XX 说 / YY 说 / ZZ 说"而不是"综合来看"时，你需要的就不是 Wiki，是 Mosaic。</div>
+
+<h3>核心原则：汇集，不编译</h3>
+
+<p>这就是 LLM Mosaic 的出发点：<strong>当信息来源是独立的视角时，你的工作不是从这些视角里蒸馏出一种"权威叙述"，而是让它们并肩而立，让读者看到完整的拼图——包括拼图块之间的缝隙。</strong></p>
+
+<p>Mosaic（马赛克/镶嵌画）这个名字本身就在传达这个意思。一副好的马赛克画，你走近了能看到每一块小瓷砖各自是什么颜色、什么质地、什么形状。退远几步，它们聚合在一起，给你一个整体的画面感——但瓷砖和瓷砖之间的缝隙始终可见。缝隙不是缺陷，缝隙是结构。</p>
+
+<p>这跟 LLM Wiki 的范式有本质区别：</p>
+
+<table>
+<tr><th></th><th>LLM Wiki 范式（编译）</th><th>LLM Mosaic 范式（汇集）</th></tr>
+<tr><td><strong>处理手法</strong></td><td>去重、归纳、统一成连贯叙述</td><td>保留每个来源的独立人格和立场</td></tr>
+<tr><td><strong>输出形态</strong></td><td>"综合来看，问题 X 的主要解法是 A、B、C"</td><td>"根据 OpenAI：A。根据 DeepMind：B。根据独立研究者：A 和 B 都有问题"</td></tr>
+<tr><td><strong>矛盾处理</strong></td><td>寻求调和，倾向于最大公约数</td><td>原样呈现，"谁说的就是谁说的"</td></tr>
+<tr><td><strong>读者角色</strong></td><td>被动接收结论</td><td>主动对比和判断</td></tr>
+</table>
+
+<h3>差异是信息，不是噪声</h3>
+
+<p>让我们具体看一个例子。假设你在研究"Rust 是否适合写 Web 后端"，收集了三个来源：</p>
+
+<p><strong>来源 A（Rust 社区 KOL）</strong>：Rust 的类型系统在编译期消除了大量的运行时错误（null pointer、data race），性能接近 C++ 同时不需要 GC，是 Web 后端的理想选择。缺点是生态还在成长中。</p>
+
+<p><strong>来源 B（创业公司 CTO）</strong>：我们用 Rust 写了两年后端。性能确实好，但团队招聘成本极高，写业务逻辑的效率比 Go 低一截。我们现在已经把新生代码迁回 Go 了。</p>
+
+<p><strong>来源 C（独立全栈开发者）</strong>：Rust 写 Web 最大问题是 async 生态的割裂——tokio vs async-std，axum vs actix-web vs warp，选型成本高，对新手不友好。</p>
+
+<p>如果让 LLM Wiki "编译"这三个来源，你可能得到："Rust 在 Web 后端领域有性能优势，但生态和招聘成本是主要挑战。"——这是一句正确的废话。它正确到没有人会觉得写错了，也正确到没有人能从中得到任何可操作的洞察。</p>
+
+<p>但如果用 LLM Mosaic 的方式：</p>
+
+<div class="compare">
+<div class="compare-good">
+<strong>LLM Wiki（编译版）</strong>
+<p>"Rust 在 Web 后端领域表现出色，提供接近 C++ 的性能和内存安全保证，但生态系统仍在成长中，招聘 Rust 开发者的成本较高，async 框架的选择存在一定程度的碎片化。总的来说，适合对性能有极致要求且团队技术实力较强的场景。"</p>
+</div>
+<div class="compare-bad">
+<strong>LLM Mosaic（汇集版）</strong>
+<p><strong>来源 A（KOL 视角）：</strong>类型安全 + 性能 = 理想选择；主要风险是生态。<br/>
+<strong>来源 B（CTO 视角）：</strong>性能好但人效低；<em>两年后战略性撤退回 Go</em>。<br/>
+<strong>来源 C（独立开发者视角）：</strong>async 生态割裂，选型成本高。<br/>
+<br/>
+<em>Tensions: B 和 A 在结论上对立；C 补充了 A 没提及的具体技术痛点。</em></p>
+</div>
+</div>
+
+<p>区别在哪？编译版让你"看完觉得懂了"，汇集版让你"看完知道自己要去验证什么"。A 和 B 为什么结论相反？B 的团队具体遇到了什么 Go 没有而 Rust 有的效率瓶颈？C 说的 async 生态问题现在改善了吗？——这些问题才是真正的学习起点。</p>
+
+<div class="callout"><strong>要点：</strong>在一个充满不确定性的领域里，"正确但无用"的综述不如"有张力但有启发性"的拼图。差异不是需要被抹平的噪声，差异是信息密度最高的地方。</div>
+
+<h3>LLM Mosaic 的五个核心机制</h3>
+
+<p>LLM Mosaic 不是简单的"并列展示"。它需要一套机制来保证"汇集"不是"堆砌"，"保留差异"不是"一团乱麻"。这套机制由五个模块构成：</p>
+
+<h4>1. 视角隔离：每个来源独立成页</h4>
+<p>核心操作：每个来源（一篇文章、一段视频、一个访谈）被 LLM 处理成一个独立的"视角页面"。这个页面不代表 LLM 的总结——它是 LLM 辅助读者理解这个来源的"导游"，但导游没有权利替原作者说话。页面上标注清楚：这是谁、在什么时候、基于什么背景说的。</p>
+
+<h4>2. 差异标记：不是调和矛盾，而是标注张力</h4>
+<p>当两个视角页面出现矛盾时，不做"综合"，而是在两者之间标注 Tension（张力）。"A 认为 RLHF 有效降低了幻觉率；B 认为 RLHF 让模型学会了更巧妙的回避而非真正的诚实——这两个结论基于不同的评估方法和实验设置。"张力不是需要消除的 bug，而是需要被理解的 structure。</p>
+
+<h4>3. 交叉引用：知识空间的导航层</h4>
+<p>不同视角之间不是孤岛。LLM Mosaic 在页面之间建立交叉引用——"关于 RLHF 的局限，参见视角 C 的 §3 和视角 E 的 §5"。"交叉引用"在 Wiki 中是锦上添花，在 Mosaic 中是导航基础设施——没有它，读者会在视角的海洋里迷路。</p>
+
+<h4>4. TODO 机制：标注未知</h4>
+<p>一个诚实的知识系统应该告诉你它不知道什么。每个 Mosaic 主题自带一个 TODO 区：目前缺失的关键视角、尚未覆盖到的维度、等待进一步验证的断言。TODO 不是为了显得谦虚，是为了告诉你"这个拼图还缺这几块"。因为你需要验证 A 和 B 谁更靠谱，需要补充某个角度的缺失信息都标注在这里。</p>
+
+<h4>5. 递归结构：Mosaic 中的 Mosaic</h4>
+<p>一个视角页面内部可以引用另一个 Mosaic 主题。比如"苏东坡的政治立场"这个视角页面，可能引用一个独立的"Mosaic: 北宋党争的各方叙事"。Mosaic 是自相似的——大的拼图里嵌着小的拼图，你可以从任何粒度切入。</p>
+
+<p>这五个机制合在一起，构成了 LLM Mosaic 的核心工作流。它不是 Wiki 的替代品——它是 Wiki 的另一面镜子。具体怎么从零构建一个 Mosaic，我们会在后面的 Part 一步步拆解。</p>
+
+</div>
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part3"><span class="num">§03</span> LLM Wiki vs LLM Mosaic：何时用哪个</h2>
+<p class="section-en">LLM Wiki vs LLM Mosaic: When to Use Which</p>
+<p class="section-intro">这两个工具不是对立的，它们解决的是两种不同的知识组织问题。关键是你得知道自己在面对哪一种问题。</p>
+
+<h3>一张表看清本质区别</h3>
+
+<p>经过前两节的展开，LLM Wiki 和 LLM Mosaic 的区别已经比较清楚了。但很多人真正用到的时候还是会犹豫——这就像你家里有锤子和螺丝刀，看见钉子总觉得用螺丝刀也能敲两下。所以我们把两者的核心差异摊在一张表里：</p>
+
+<table>
+<tr><th>维度</th><th>LLM Wiki</th><th>LLM Mosaic</th></tr>
+<tr><td><strong>信息来源</strong></td><td>教材、手册、技术文档——来源之间存在天然的"可合并性"</td><td>评论、分析、传记、判例——来源之间存在天然的"不可合并性"</td></tr>
+<tr><td><strong>页面结构</strong></td><td>话题导向："幻觉问题"是一个页面，所有信息融进去</td><td>来源导向："OpenAI 怎么看幻觉"和"DeepMind 怎么看幻觉"是两个独立页面</td></tr>
+<tr><td><strong>LLM 角色</strong></td><td>编辑：提取、归纳、去重、统一叙述</td><td>导游：解释、导航、标注差异，但不替原作者说话</td></tr>
+<tr><td><strong>读者角色</strong></td><td>学习者：接收经过整理的知识体系</td><td>判断者：在多元视角中形成自己的结论</td></tr>
+<tr><td><strong>对"共识"的态度</strong></td><td>追求共识：找最大公约数，构建连贯叙述</td><td>尊重差异：保留张力和矛盾，不强制统一</td></tr>
+<tr><td><strong>更新逻辑</strong></td><td>增量叠加：新信息融入已有结构，修改"正文"</td><td>平行扩展：新信息作为新视角加入，不影响已有视角页面</td></tr>
+<tr><td><strong>典型用例</strong></td><td>"Rust 异步编程指南""Kubernetes 运维手册""机器学习面试题纲"</td><td>"苏东坡的多面人生""大模型安全性的各方立场""2026 年 AI 监管政策的不同解读"</td></tr>
+</table>
+
+<div class="tip"><strong>记住这个感觉：</strong>Wiki 在帮你"读书"，Mosaic 在帮你"开会"——把一屋子意见不同的人都请来，让你听他们各自说完，你自己拿主意。</div>
+
+<h3>信号判断：你敢说"综合来看"吗？</h3>
+
+<p>如果你不想背上面的表，这里有一个更简单的判断方法。问自己三个问题：</p>
+
+<table>
+<tr><th>判断信号</th><th>指向 Wiki</th><th>指向 Mosaic</th></tr>
+<tr><td><strong>1. 来源之间存在本质矛盾吗？</strong></td><td>没有。不同来源讲的是同一套知识的不同侧面，不冲突</td><td>有。来源在核心结论上相左，且矛盾的根源是立场/方法论/数据不同</td></tr>
+<tr><td><strong>2. 你能自信地说出"综合来看"吗？</strong></td><td>能。"综合来看，Rust 的异步编程有三种主流模式"——这句话有意义</td><td>不能。"综合来看，苏东坡是一个怎样的人"——这句话是伪命题</td></tr>
+<tr><td><strong>3. 差异对你来说是麻烦还是价值？</strong></td><td>麻烦。你不关心每个作者怎么想，你只关心正确的结论是什么</td><td>价值。差异本身就是你要理解的东西，抹平差异=丢失信息</td></tr>
+</table>
+
+<p>如果你的答案在两个之间摇摆——或者说，你的项目中<strong>部分模块适合 Wiki，部分模块适合 Mosaic</strong>——那答案就是：<strong>混用。</strong>它们不是非此即彼的选择。</p>
+
+<h3>两者不互斥：苏东坡项目就是混用</h3>
+
+<p>举一个具体的例子。我们在一个"苏东坡研究"项目里同时用了 Wiki 和 Mosaic：</p>
+
+<ul>
+<li><strong>Wiki 负责的部分：</strong>苏东坡的生平年表、主要作品目录、宋代官制简介、诗词格律基础——这些是事实性知识，来源之间不矛盾，需要的是"整理"而不是"保留分歧"。</li>
+<li><strong>Mosaic 负责的部分：</strong>不同传记作者对苏东坡同一段人生经历的不同解读、不同文学评论流派对《赤壁赋》的批评、当代学者对苏东坡政治立场的争论——这些是视角性知识，需要"并列"而不是"合并"。</li>
+<li><strong>桥接层：</strong>Wiki 页面中的某些段落会链接到 Mosaic 中的视角页面（"关于苏东坡在乌台诗案中的表现，不同传记作者有不同解读，详见 Mosaic: 乌台诗案的各方叙述"）；Mosaic 中的引用会链接回 Wiki（"参见生平年表的 1079 年条目"）。</li>
+</ul>
+
+<p>这个项目让我们意识到一点：<strong>真实世界里的知识，几乎永远是 Wiki 和 Mosaic 的混合体。</strong>你有 80% 的内容是事实层——可以用 Wiki 来组织；剩下 20% 的内容是观点层——需要用 Mosaic 来保留。而这 20% 往往是最有价值但也最容易被"编译"掉的。</p>
+
+<div class="callout"><strong>要点：</strong>先做 Wiki，还是先做 Mosaic？这取决于你的材料。如果你的材料中事实和逻辑推导占主导（比如技术文档），先 Wiki 后补 Mosaic 视角。如果你在多个主观解读之间纠结（比如人物评价），先从 Mosaic 开始，在过程中提炼出 Wiki 页面来做事实锚定。</div>
+
+<h3>选择决策树</h3>
+
+<p>如果你现在手上有一个项目，不知道该用 Wiki、Mosaic 还是混用，可以走一遍下面这个决策流程：</p>
+
+<div class="flow">
+<div class="flow-item">你的信息来源之间存在<br/><strong>核心结论上的矛盾</strong>吗？</div>
+<div class="flow-arrow">↓ 是</div>
+<div class="flow-item"><strong>用 Mosaic</strong><br/>每个矛盾方独立成页，保留张力</div>
+</div>
+
+<div class="flow" style="margin-top: 16px;">
+<div class="flow-item">你的信息来源之间存在<br/><strong>核心结论上的矛盾</strong>吗？</div>
+<div class="flow-arrow">↓ 否</div>
+<div class="flow-item">你能自信地说出<br/><strong>"综合来看"</strong>吗？</div>
+<div class="flow-arrow">↓ 能</div>
+<div class="flow-item"><strong>用 Wiki</strong><br/>编译成结构化页面</div>
+</div>
+
+<div class="flow" style="margin-top: 16px;">
+<div class="flow-item">你的信息来源之间存在<br/><strong>核心结论上的矛盾</strong>吗？</div>
+<div class="flow-arrow">↓ 否</div>
+<div class="flow-item">你能自信地说出<br/><strong>"综合来看"</strong>吗？</div>
+<div class="flow-arrow">↓ 部分能，部分不能</div>
+<div class="flow-item"><strong>混用</strong><br/>事实层 Wiki + 观点层 Mosaic，用交叉引用桥接</div>
+</div>
+
+<p style="margin-top: 20px;">这棵树简单粗暴，但它抓住了最核心的问题：<strong>你的知识是"可合并的"还是"不可合并的"？</strong>如果你的材料可以被一个"正确答案"覆盖，别把简单问题复杂化，Wiki 就够了。如果"正确答案"本身就是一个假命题——因为不存在一个让所有人同意的叙述——那就别逼 LLM 去编一个出来。做 Mosaic。</p>
+
+<div class="warning"><strong>常见误区：</strong>有些材料看起来是"事实"，但包裹着"视角"。比如一份"技术博客"可能看起来是技术文档，但它对某些框架的偏好、对某些方法的贬低，本身就是一种视角。如果你把它当 Wiki 原料"编译"进去，它的立场就被你洗成"知识"了。判断的关键不是材料的类型（文档 vs 评论），而是材料是否携带<strong>不可消解的立场</strong>。</div>
+
+<h3>从认知到操作</h3>
+
+<p>至此，我们回答了"为什么"的问题：为什么需要 LLM Mosaic？因为它解决了一个 LLM Wiki 解决不了的问题——在多元视角并存的世界里，保留差异本身就是一种知识组织方式。</p>
+
+<p>下一部分我们会进入操作层。我们不假设你有一个固定的"流程"——因为 Mosaic 的最好启动点，往往是你已经在做、但一直觉得做得不太对劲的那件事。</p>
+
+<p>可能是一次竞品分析。可能是一份人物档案。可能是一次有争议的技术选型讨论。不管是什么，你会看到：从你现有的材料中长出一个 Mosaic，比你想象的要自然得多。</p>
+
+<p><em>作者：亲爱的马拉亚</em></p>
+
+</div>
+
+<!-- ===== part02-architecture.html ===== -->
+<div class="content">
+
+<h2 class="section-title page-break" id="part4"><span class="num">§04</span> 三层架构：LLM Mosaic 的骨架</h2>
+<p class="section-en">The Three-Layer Architecture: LLM Mosaic's Backbone</p>
+<p class="section-intro">LLM Mosaic 不是一个大平层，而是一栋三层楼&mdash;&mdash;每层有自己的职责、自己的格式、自己的纪律。理解了这三层，你就理解了 Mosaic 的全部核心设计。</p>
+
+<h3>三层全景图</h3>
+
+<p>先看一张全景图，建立直觉：</p>
+
+<div class="flow">
+  <div class="flow-item"><strong>第一层</strong><br/>原始资料<br/><small>只读·不可修改</small></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item"><strong>第二层</strong><br/>Mosaic 页面<br/><small>实体维度·逐条溯源</small></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item"><strong>第三层</strong><br/>产出层<br/><small>叙事/分析/报告</small></div>
+</div>
+
+<p>三层之间的关系是严格单向的：原始资料流入 Mosaic 页面，Mosaic 页面流入各种产出。没有回流，没有交叉污染。每一层只对上一层负责。</p>
+
+<div class="callout"><strong>要点：</strong>LLM Mosaic 最核心的设计原则&mdash;&mdash;<strong>输出可以有自己的立场，但素材永远透明、可核查。</strong>三层架构就是为了把这个原则变成工程现实。</div>
+
+<h3>第一层：原始资料层（Source Layer）</h3>
+
+<p>第一层是 Mosaic 的根基。这一层的铁律只有一条：<strong>只读，不可修改。</strong>原始资料一旦放入 sources/ 目录，就没有任何人&mdash;&mdash;包括你&mdash;&mdash;能改它。你只能读它、引用它，不能改它一个字。</p>
+
+<p>为什么这条规矩这么重要？因为 LLM 有一个臭毛病：它会根据自己的"理解"重述原文。一次重述丢 10% 的信息，三次重述下来，年谱里的"苏轼过扬州"就变成了"苏轼途经扬州"，再过几天就变成了"苏轼到过扬州附近"。一旦源头被污染，整条链条都没有意义。</p>
+
+<h4>什么算"独立来源"？</h4>
+
+<p>不是所有东西都适合放进第一层。独立来源的核心定义是：<strong>不同来源之间不互相依赖，各自独立产生的记录。</strong>两个博客互相引用？不算独立。两篇引用同一篇新闻报道？也不算独立。学术专著和当代笔记？算独立，因为它们各自独立产生。</p>
+
+<p>在实践中，独立来源包括这 7 种类型：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>类型</th>
+      <th>说明</th>
+      <th>苏东坡项目中的例子</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1. 年谱</td>
+      <td>按年/月/日编排的编年记录</td>
+      <td>《苏轼年谱》（孔凡礼，中华书局，1998），三卷</td>
+    </tr>
+    <tr>
+      <td>2. 学术专著</td>
+      <td>某一专题的深度研究</td>
+      <td>《苏轼传》（王水照、崔铭）</td>
+    </tr>
+    <tr>
+      <td>3. 原始文献</td>
+      <td>研究对象本人或同时代人的作品</td>
+      <td>《苏轼文集》《苏轼诗集》</td>
+    </tr>
+    <tr>
+      <td>4. 同时代笔记</td>
+      <td>同时代人留下的杂记、书信</td>
+      <td>《邵氏闻见录》《挥麈录》</td>
+    </tr>
+    <tr>
+      <td>5. 地方志</td>
+      <td>地方行政编纂的史料</td>
+      <td>《杭州府志》中与苏轼相关的条目</td>
+    </tr>
+    <tr>
+      <td>6. 高质量论文</td>
+      <td>同行评审的学术论文</td>
+      <td>对某一事件（如乌台诗案）的专门考证</td>
+    </tr>
+    <tr>
+      <td>7. 工具书条目</td>
+      <td>权威工具书的词条</td>
+      <td>《中国历史大辞典》相关词条</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="tip"><strong>不是说所有项目都必须凑齐这 7 种。</strong>不同领域有不同的独立来源类型。做科技产品 Mosaic 时，独立来源可能是产品博客、changelog、技术论文和创始人访谈。关键是判断"它们是不是各自独立产生的"。</div>
+
+<h4>第一层的数据格式</h4>
+
+<p>原始资料以 Markdown 文件存储，放在 <code>sources/</code> 目录下。每条信息都要做好标注&mdash;&mdash;哪个版本、哪一页、哪一行。标得越细，后面溯源就越方便。</p>
+
+<p>举个例子，苏东坡项目中年谱卷一的存储格式：</p>
+
+<pre><code>sources/
+├── nianpu-j01.md     # 年谱卷一（嘉祐元年~熙宁二年）
+├── nianpu-j02.md     # 年谱卷二（熙宁三年~元丰二年）
+├── nianpu-j03.md     # 年谱卷三（元丰三年~建中靖国元年）
+├── shuixi-zhuan.md   # 《苏轼传》（王水照、崔铭）
+├── wangwen-gao.md    # 《苏文忠公诗编注集成总案》（王文诰）
+├── sucai-biji.md     # 同时代笔记汇编
+└── difangzhi.md      # 与苏轼相关的地方志条目</code></pre>
+
+<p>每个文件都标注了卷次、行号。为什么？因为这关系到后面溯源能精确到什么程度&mdash;&mdash;这个话题我们会在 §06 详细展开。</p>
+
+<h3>第二层：Mosaic 页面层（Mosaic Page Layer）</h3>
+
+<p>第二层是整个 Mosaic 最独特的部分。<strong>每个实体一个页面，每个页面都是从第一层"编织"出来的。</strong></p>
+
+<p>这里的"实体"（Entity）是 LLM Mosaic 的核心抽象。拿苏东坡来说，"苏轼本人"是一个实体，"乌台诗案"是一个实体，"杭州任期"是一个实体，"与王安石的关系"也是一个实体。你可以把实体理解为"你关心的人、事件、概念或关系单元"。</p>
+
+<h4>Mosaic 页面的标准结构模板</h4>
+
+<p>每个 Mosaic 页面都遵循一个固定模板，包含三个核心组件：</p>
+
+<pre><code># 实体名称
+
+## 时间线（Timeline）
+（按时间顺序排列的关键节点，每个节点带溯源标记）
+
+## 各来源视角（Cross-Source Perspectives）
+（不同来源对这个实体的描述，并置呈现）
+
+## 关键差异表（Key Discrepancies）
+（来源之间说法不一致的地方，以及差异的可解释程度）</code></pre>
+
+<p>三个组件各司其职：</p>
+
+<ul>
+  <li><strong>时间线</strong>是骨架&mdash;&mdash;告诉你"发生了什么，什么时候发生的"。每个时间节点后面都挂了溯源 tag，点一下就能跳回原文。</li>
+  <li><strong>各来源视角</strong>是血肉&mdash;&mdash;不整合、不揉碎，而是并置呈现不同来源的观点。年谱说"某年某月苏轼至扬州"，《苏轼传》说"大约在当年秋天途经扬州"，地方志说"有记录表明苏轼曾在扬州停留数日"&mdash;&mdash;三条信息并排放，让读者自己看到粗细差异。</li>
+  <li><strong>关键差异表</strong>是冲突清单&mdash;&mdash;不是试图裁决对错（那是学者的事），而是标注差异并尽量解释差异的原因。是年代考订不同？是史料来源不同？还是后世解读不同？</li>
+</ul>
+
+<div class="callout"><strong>要点：</strong>Mosaic 页面不做"融合"，只做"并置"。融合 = 作者替你做了判断；并置 = 把原始材料摊开来，你自己看。这是 LLM Mosaic 和传统百科全书最本质的区别。</div>
+
+<h4>以"苏轼与王安石关系"为例</h4>
+
+<p>看一个具体的 Mosaic 页面片段，你就能感受这种"并置"的力量：</p>
+
+<pre><code># 苏轼与王安石关系
+
+## 时间线
+- 嘉祐六年（1061）：苏轼应制科，王安石时为知制诰 [[nianpu-j01#嘉祐六年|📖]]
+- 熙宁二年（1069）：苏轼上书反对免役法 [[nianpu-j01#熙宁二年|📖]]
+- 元丰七年（1084）：苏轼自黄州移汝州，途经金陵，与王安石会面 [[nianpu-j02#元丰七年|📖]]
+- ...
+
+## 各来源视角
+**年谱记载：**
+&gt; 七月，过金陵，见王安石。先是安石罢相，退居金陵。（卷三，页 873）
+
+**《苏轼传》视角：**
+&gt; 王水照认为这次会面标志着两人关系从政治对立转向文学欣赏。
+&gt; 苏轼在金陵逗留数日，期间与王安石多有唱和。（第十五章）
+
+**同时代笔记：**
+&gt; 《邵氏闻见录》载：&quot;东坡自黄移汝，过金陵，安石野服乘驴谒于舟次。&quot;（卷十二）
+
+## 关键差异
+| 差异点 | 年谱 | 《苏轼传》 | 可解释性 |
+|--------|------|-----------|---------|
+| 会面性质 | 简单记录 | 深入分析政治含义 | 体裁不同，可解释 |
+| 谁主动拜访 | 未详述 | 未详述 | 《邵氏》补充为王安石主动 |</code></pre>
+
+<p>注意这些 <code>[[nianpu-j01#嘉祐六年|📖]]</code> 的标记&mdash;&mdash;这就是溯源机制，每一条信息都标注了它来自哪个来源、哪个章节。这在 §06 会详细展开。</p>
+
+<h3>第三层：产出层（Output Layer）</h3>
+
+<p>第三层是第一、第二层的"消费者"。同一套 Mosaic 页面，可以向不同方向输出不同形态的内容：</p>
+
+<div class="flow">
+  <div class="flow-item">同一套<br/>Mosaic 页面</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">时间线长文<br/><small>叙事性输出</small></div>
+  <div class="flow-item">对比分析<br/><small>分析性输出</small></div>
+  <div class="flow-item">Q&amp;A 问答<br/><small>交互性输出</small></div>
+  <div class="flow-item">Wiki/数据库<br/><small>结构化输出</small></div>
+</div>
+
+<p>产出层允许有立场、有观点&mdash;&mdash;你可以基于 Mosaic 写一篇角度鲜明的分析文章，可以按某种叙事逻辑剪裁出一条时间线，也可以只输出你想强调的那一部分信息。但有一个硬约束：<strong>输出中的每一个事实性陈述，都能回到第二层的某个溯源节点，最终能回到第一层的原始出处。</strong></p>
+
+<div class="compare">
+  <div class="compare-good"><strong>推荐：</strong>写一篇"苏轼在黄州期间的心态转变"的分析，引用来源于 Mosaic 中的时间线和各来源视角，每一条关键判断背后都有可溯源的素材。</div>
+  <div class="compare-bad"><strong>不推荐：</strong>写一篇"苏轼一生跌宕起伏"的散文，里面说"苏轼在黄州种了两百颗橘子树"&mdash;&mdash;但你事后发现这个数字是你"觉得合理就写上去了"，原始材料里根本没有。</div>
+</div>
+
+<p>核心原则再强调一遍：<strong>输出允许有立场，素材永远透明。</strong>你是作者，你有权选择怎么讲这个故事，但你的读者有权知道你的素材从哪来的。LLM Mosaic 让这种权利从理念变成了可操作的功能。</p>
+
+<h3>辅助文件：entity-index.md 和 log.md</h3>
+
+<p>除了三层主体，LLM Mosaic 还有两个辅助文件，它们是整个系统的"导航系统"和"黑匣子"：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>文件</th>
+      <th>作用</th>
+      <th>为什么需要</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>entity-index.md</code></td>
+      <td>实体 × 来源矩阵。记录每个实体在哪些来源中有信息</td>
+      <td>LLM 编译时不用通读所有来源，只读相关章节。详见 §05</td>
+    </tr>
+    <tr>
+      <td><code>log.md</code></td>
+      <td>操作日志。记录每次对 Mosaic 的修改：谁在什么时间改了哪个文件、改了什么</td>
+      <td>当信息出现矛盾时，你知道自己是什么时候、基于什么判断做的修改</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="tip"><code>log.md</code> 的作用容易被低估。设想：三周后你发现"Mosaic 里苏轼到扬州的时间写的是八月，但我现在找到的新材料说是九月"&mdash;&mdash;如果没有 log.md，你会花半小时回想"当初是哪个来源说八月的？我当时对比过其他来源没有？"。有 log.md，30 秒就能定位当时的操作记录。</div>
+
+<h3>与 LLM Wiki 三层架构的对比</h3>
+
+<p>如果你看过<strong>亲爱的马拉亚</strong>写的 <em>LLM Wiki 从入门到精通</em>，你会发现两者有相似的三层结构。但 LLM Mosaic 不是 LLM Wiki 的翻版&mdash;&mdash;它们在核心定位上有本质区别：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>维度</th>
+      <th>LLM Wiki</th>
+      <th>LLM Mosaic</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>核心目标</td>
+      <td>把 LLM 变成一个"可信的知识库"</td>
+      <td>把 LLM 变成一个"多来源对勘工具"</td>
+    </tr>
+    <tr>
+      <td>数据组织方式</td>
+      <td>按主题/概念分层，最终输出一个整合后的"定本"</td>
+      <td>按实体编织多来源，保持来源之间的张力和差异</td>
+    </tr>
+    <tr>
+      <td>对待"冲突"的态度</td>
+      <td>标注冲突 → 倾向于给出一个"当前最可靠的版本"</td>
+      <td>标注冲突 → 并置差异，不做裁决</td>
+    </tr>
+    <tr>
+      <td>第二层的结构</td>
+      <td>概念卡片（Concept Card）：整合后的稳定知识单元</td>
+      <td>Mosaic 页面：多来源视角的并置呈现</td>
+    </tr>
+    <tr>
+      <td>适用场景</td>
+      <td>需要"可稳定引用的知识"：团队文档、技术手册、标准定义</td>
+      <td>需要"可对勘的多视角"：历史研究、事件还原、多来源交叉验证</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout"><strong>要点：</strong>LLM Wiki 回答"什么是对的？"，LLM Mosaic 回答"各家都怎么说的？"。两者不是竞争关系，是同一位作者（亲爱的马拉亚）用不同的架构解决不同的问题。当你的需求是"确定一个可靠的事实版本"时用 Wiki；当你的需求是"看全所有来源，自己判断"时用 Mosaic。</div>
+
+</div>
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part5"><span class="num">§05</span> 实体 &times; 来源矩阵：Mosaic 的总控台</h2>
+<p class="section-en">The Entity &times; Source Matrix: Mosaic's Control Center</p>
+<p class="section-intro">如果说三层架构是 Mosaic 的骨架，那 entity-index.md 就是它的神经系统。没有这张矩阵，三层架构再漂亮，实际操作时也是一团乱麻。</p>
+
+<h3>entity-index.md 是什么</h3>
+
+<p><strong>entity-index.md 是一张二维表。实体做行，来源做列，交叉格子里填"这个实体在这个来源中有没有信息"。</strong>就这么简单。但它的效果，远超它的简单程度。</p>
+
+<p>先看一个简化版的 entity-index.md，来自苏东坡项目的实际矩阵片段：</p>
+
+<pre><code># 实体索引
+
+| 实体 | 年谱卷一 | 年谱卷二 | 年谱卷三 | 苏轼传 | 王文诰 | 宋代笔记 | 地方志 |
+|------|:------:|:------:|:------:|:-----:|:-----:|:------:|:-----:|
+| 苏轼本人 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 乌台诗案 | ❌ | ✅✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
+| 杭州任期 | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| 与王安石关系 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| 黄州时期 | ❌ | ✅ | ✅✅ | ✅ | ✅ | ✅ | ❌ |
+| 儋州流放 | ❌ | ❌ | ✅✅ | ✅ | ❌ | ✅ | ❌ |
+| 朝云 | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| 苏辙 | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+</code></pre>
+
+<p>标记含义：<code>✅</code> = 有少量信息（1-5 条），<code>✅✅</code> = 信息密集，<code>❌</code> = 基本没有相关信息。</p>
+
+<div class="tip">矩阵中的标记不追求精确计数，追求的是<strong>快速判断</strong>：这个实体在哪些来源中有话可说？一眼扫过去就知道。"乌台诗案"在年谱卷二和信息密集（✅✅），在年谱卷一和三里几乎没有信息（❌）&mdash;&mdash;这个判断三秒就能做完。</div>
+
+<h3>为什么需要这张矩阵</h3>
+
+<p>在没有 entity-index.md 之前，LLM 每次要编译或更新一个实体的 Mosaic 页面时，行为很"憨厚"：它会把 sources/ 目录下的 <strong>所有文件全部通读一遍</strong>，然后从中挑出跟这个实体相关的内容。</p>
+
+<p>看一个对比：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>有矩阵</th>
+      <th>无矩阵</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>编译"朝云"页面</td>
+      <td>LLM 只读年谱卷二 + 苏轼传 → <strong>2 个文件</strong></td>
+      <td>LLM 通读全部 7 个文件 → <strong>7 个文件</strong></td>
+    </tr>
+    <tr>
+      <td>编译"乌台诗案"页面</td>
+      <td>LLM 只读年谱卷二 + 苏轼传 + 王文诰 + 笔记 → <strong>4 个文件</strong></td>
+      <td>LLM 通读全部 7 个文件 → <strong>7 个文件</strong></td>
+    </tr>
+    <tr>
+      <td>新增来源《宋代职官》</td>
+      <td>LLM 检查矩阵&rarr; 找出哪些实体可能在新来源中有信息&rarr; 只更新这些实体的页面 → <strong>精准更新</strong></td>
+      <td>LLM 对所有实体重新通读新来源 → <strong>全部重新处理</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout"><strong>要点：</strong>entity-index.md 不是可有可无的锦上添花&mdash;&mdash;当你的实体数量超过 10、来源超过 5 时，没有它，LLM 的 token 消耗会失控，更重要的是 LLM 的注意力会被无关信息稀释。注意力稀释 = 错误率上升。</div>
+
+<h3>矩阵的三种价值</h3>
+
+<p>entity-index.md 在 LLM Mosaic 工作流的三个关键时刻发挥作用：</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>编译前：知道去哪找</h4>
+    <p>开始编译"杭州任期"之前，扫一眼矩阵：年谱卷一有信息，苏轼传有信息，地方志有信息&mdash;&mdash;OK，只读这三个文件。不用通读全部 7 个。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>编译时：只读该读的</h4>
+    <p>矩阵给了 LLM 一个"阅读清单"（reading list）。因为 LLM 只需要聚焦 3 个文件而不是 7 个，它的注意力更集中，提取的信息更准确。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>新增来源时：知道该补哪些</h4>
+    <p>当你新加了一个来源&mdash;&mdash;比如一本新买的苏轼研究专著&mdash;&mdash;你不需要手动判断"这个新材料对每个实体有什么影响"。你可以让 LLM 先扫一遍新材料，对照矩阵，找出哪些实体在新材料中有信息，然后只更新那些实体的页面。</p>
+  </div>
+</div>
+
+<h3>矩阵不是"计数的"，是"指路的"</h3>
+
+<p>有一个常见误解：觉得矩阵必须精确记录每个来源中每个实体出现了多少次。这种想法来自传统学术研究的习惯。但在 LLM Mosaic 中，<strong>矩阵不追求精准计数，追求快速定向。</strong></p>
+
+<div class="compare">
+  <div class="compare-good"><strong>推荐：</strong>用简单的三档标记（❌ / ✅ / ✅✅）就够了。❌ = 没有，✅ = 有一些，✅✅ = 信息密集。这个颗粒度刚好够 LLM 做判断。</div>
+  <div class="compare-bad"><strong>不推荐：</strong>在每个格子里填精确数字。"年谱卷二中共提到苏轼 247 次，其中直接信息 156 次，间接信息 91 次..."&mdash;&mdash;这些数字不会让你的 Mosaic 更准确，但一定会让你在维护矩阵上耗尽耐心。</div>
+</div>
+
+<p>矩阵回答的永远是同一个问题：<strong>"我需要了解这个实体的时候，我应该翻哪些来源？"</strong>只要矩阵能在一秒内给出这个答案，它就完美了。精确计数属于学术引注的范畴，不关心它完全是合理的。</p>
+
+<h3>新增来源后的矩阵更新流程</h3>
+
+<p>一张矩阵的生命力在于它被更新。当项目中新增一个来源时，按以下流程更新矩阵：</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>将新来源加入矩阵列</h4>
+    <p>在矩阵的 Markdown 表格中新增一列，列头为新来源的文件名（不含 .md 后缀）。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>让 LLM 对照矩阵逐行判断</h4>
+    <p>提示词示例：<em>"你正在审读一份新的独立来源《&lt;来源名&gt;》（文件路径：&lt;path&gt;）。请对照 entity-index.md 中的每个实体，判断新来源中是否包含与该实体直接相关的信息。对每个实体标注：❌（无）、✅（有少量）、✅✅（信息密集）。更新 entity-index.md 的对应列。"</em></p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>对 ✅✅ 的实体，启动 Mosaic 页面更新</h4>
+    <p>新来源中信息密集的实体（✅✅），建议立即更新对应的 Mosaic 页面，把新视角编织进去。信息量少的（✅）可以排到后续批次。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h4>在 log.md 中记录本次更新</h4>
+    <p>记录格式：<code>YYYY-MM-DD | 新增来源：《XXX》| 更新实体：[列出被更新的实体] | 矩阵已更新</code></p>
+  </div>
+</div>
+
+<div class="warning"><strong>注意：</strong>矩阵更新的核心是保持"懒评估"策略。新增一个来源后，不要对所有实体的页面做全量更新&mdash;&mdash;只更新那些新来源中有实质性新信息的实体。矩阵帮你判断哪些该更新、哪些可以先放一放。</div>
+
+<h3>矩阵作为"项目仪表盘"</h3>
+
+<p>除了指导 LLM 的工作，entity-index.md 还有一个人类视角的价值：它是整个 Mosaic 项目的"仪表盘"。扫一眼矩阵，你就能看到：</p>
+
+<ul>
+  <li><strong>覆盖密度：</strong>哪些实体被多个来源覆盖（信息充分，交叉验证的可能性高），哪些实体只出现在一两个来源中（信息单薄，需警惕）</li>
+  <li><strong>来源价值：</strong>哪些来源对多个实体都有贡献（边缘覆盖广），哪些来源只在个别实体中有信息（边缘价值窄）</li>
+  <li><strong>空白区域：</strong>哪些实体在某些关键来源中完全没有信息&mdash;&mdash;这本身就是一个重要的发现，可能意味着你需要寻找补充来源</li>
+</ul>
+
+<p>用人眼扫一下上面苏东坡项目的矩阵，"朝云"这一行就特别醒目：7 个来源中只有 2 个有她的信息。这立即告诉你一个事实：在现有的资料来源里，关于朝云的信息天然稀缺。在基于 Mosaic 写分析文章时，你要格外注意不要过度推断这些稀缺信息暗示的含义。</p>
+
+</div>
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part6"><span class="num">§06</span> 逐条溯源与块级引用：让每句话都能找到"家"</h2>
+<p class="section-en">Granular Provenance &amp; Block-Level References: Every Claim Has a Home</p>
+<p class="section-intro">溯源是 LLM Mosaic 的质量底线。溯源做得不够细，Mosaic 就退化成一个"看上去很丰富的 LLM 摘要集"。溯源做得好，每一条信息都能精确回到原文的对应位置&mdash;&mdash;这才是 LLM Mosaic 区别于普通 AI 生成内容的护城河。</p>
+
+<h3>溯源的两级体系：章节级 vs 块级</h3>
+
+<p>LLM Mosaic 的溯源分为两级：章节级引用和块级引用。两者不是"哪个更好"的问题，而是"哪个更合适"的问题，对应不同的场景。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>章节级引用</th>
+      <th>块级引用</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>语法</strong></td>
+      <td><code>[[来源#章节名|📖]]</code></td>
+      <td><code>[[来源#^block-id]]</code></td>
+    </tr>
+    <tr>
+      <td><strong>精确度</strong></td>
+      <td>到章节（几十行到几百行的范围）</td>
+      <td>到行/段落（单行到几行的范围）</td>
+    </tr>
+    <tr>
+      <td><strong>适用场景</strong></td>
+      <td>结构化 MD 文件，有明确的 ## 标题层次</td>
+      <td>PDF 扫描件转文本、无清晰章节结构的材料、需要精确定位的引用</td>
+    </tr>
+    <tr>
+      <td><strong>维护成本</strong></td>
+      <td>低。改标题时需检查引用是否断开</td>
+      <td>低。block-id 是稳定的，不会因为周围内容变化而失效</td>
+    </tr>
+    <tr>
+      <td><strong>在苏东坡项目中的用法</strong></td>
+      <td>引用《苏轼传》的某一章</td>
+      <td>引用年谱中某一卷的某一行</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>章节级引用：当来源有结构时</h3>
+
+<p>章节级引用的语法很直接：</p>
+
+<pre><code>[[来源文件名#章节标题|📖]]</code></pre>
+
+<p>例如，在 Mosaic 页面中引用《苏轼传》关于乌台诗案的描述：</p>
+
+<pre><code>元丰二年七月，御史李定、舒亶等人弹劾苏轼以诗讽政。神宗下令逮捕苏轼，
+押解入京，关入御史台狱。[[shuixi-zhuan#乌台诗案|📖]]</code></pre>
+
+<p>这里的 <code>[[shuixi-zhuan#乌台诗案|📖]]</code> 就是章节级引用。它告诉读者：这条信息来自 <code>shuixi-zhuan.md</code> 文件中"乌台诗案"这个章节。在 Obsidian 中，点击 <code>📖</code> 就能直接跳转到对应章节。</p>
+
+<p>章节级引用适用于有清晰 <code>##</code> 标题结构的 Markdown 文件。大部分书籍、论文、百科条目都属于这种情况。</p>
+
+<div class="tip">选择章节级引用还是块级引用，判断标准只有一个：<strong>引用的原始材料是否有清晰的章节结构？</strong>有 → 章节级就够了；没有 → 必须用块级。</div>
+
+<h3>块级引用：当来源没有结构时</h3>
+
+<p>很多原始资料没有章节结构。最典型的就是年谱&mdash;&mdash;三卷几十万字的编年记录，按年份排列，但每一行都是独立的条目，没有标题层次。这时候章节级引用就不够用了。你引用"年谱卷一第三页的某一段"，但年谱卷一可能有几百页，"第三页"只是你自己的阅读顺序，不是文件的内部结构。</p>
+
+<p>这就是块级引用的用武之地。块级引用可以精确到文件的<strong>任意一行</strong>：</p>
+
+<pre><code>[[来源文件名#^block-id]]</code></pre>
+
+<p>例如，在 Mosaic 页面中引用年谱中某一条特定记录：</p>
+
+<pre><code>嘉祐二年（1057）春，苏轼与弟苏辙同科进士及第。主考官欧阳修对苏轼的文章
+大为赞赏，以为门生曾巩所作，为避嫌抑为第二。[[nianpu-j01#^nianpu-j01-L2233]]</code></pre>
+
+<p>这个 <code>^nianpu-j01-L2233</code> 不是一个随意的字符串&mdash;&mdash;它有一套编号规范。</p>
+
+<h3>块级编号体系</h3>
+
+<p>块级引用的 block-id 不能乱起。在苏东坡项目中，编号格式统一为：</p>
+
+<pre><code>^[文件名]-L[行号]</code></pre>
+
+<p>例如：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Block ID</th>
+      <th>含义</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>^nianpu-j01-L2233</code></td>
+      <td>年谱卷一，第 2233 行</td>
+    </tr>
+    <tr>
+      <td><code>^nianpu-j02-L158</code></td>
+      <td>年谱卷二，第 158 行</td>
+    </tr>
+    <tr>
+      <td><code>^shuixi-zhuan-L450</code></td>
+      <td>《苏轼传》，第 450 行</td>
+    </tr>
+    <tr>
+      <td><code>^difangzhi-L92</code></td>
+      <td>地方志汇编，第 92 行</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>在原始资料的 Markdown 文件中，block-id 是这样嵌入的。以年谱卷一为例：</p>
+
+<pre><code>嘉祐二年（1057）三月，仁宗御崇政殿试礼部奏名进士。内出《民监赋》、
+《鸾刀诗》、《重巽申命论》题。苏轼、苏辙皆中第。主考官欧阳修得苏轼
+《刑赏忠厚之至论》，惊喜，欲以冠多士，疑门人曾巩所为，但置第二。
+^nianpu-j01-L2233
+
+嘉祐二年（1057）四月，苏轼母程氏卒于蜀。轼、辙奔丧归蜀。 ^nianpu-j01-L2240</code></pre>
+
+<p>注意 block-id 放在对应段落的末尾（也可以是行尾），前面没有任何特殊标记，就是一个纯文本的 <code>^xxx</code>。Obsidian 会自动识别并建立链接。</p>
+
+<div class="callout"><strong>要点：</strong>为什么编号用行号而不是页码？因为行号在文件编辑过程中是稳定的&mdash;&mdash;你在这个段落前面插入新内容，行号虽然变了，但 block-id 本身不会变。Obsidian 的块引用是基于 block-id 字符串匹配的，不依赖行号计算。</div>
+
+<h3>为什么块级引用是"不可替代的"</h3>
+
+<p>一个常见的疑问："我所有的资料都有章节结构，是不是不需要块级引用？"</p>
+
+<p>答案是：<strong>很可能你需要。</strong>有三个场景会让块级引用成为必选项：</p>
+
+<ol>
+  <li><strong>PDF 扫描件转文本：</strong>这是最典型的无结构场景。一本从 PDF OCR 出来的文本文件，可能只有一大坨连续的文字，没有任何 Markdown 标题。你想引用其中某一段，章节级引用连"章节"都没有。</li>
+  <li><strong>需要"对话式引用"：</strong>当两个来源对同一件事的记载有微妙差异时&mdash;&mdash;比如年谱说"苏轼至扬州"，《苏轼传》说"约在秋天途经扬州"&mdash;&mdash;你需要精确指向这两个描述各自在原文中的具体位置，才能让读者自己判断差异。章节级引用太粗了。</li>
+  <li><strong>后续重新编译时保持一致性：</strong>当 LLM 一个月后重新编译某个 Mosaic 页面时，块级引用给了它一个精确的"坐标"，不需要重新在原文中"找到"那段信息，避免了 LLM 的随机性导致前后引用位置不一致。</li>
+</ol>
+
+<h3>Wikilink 跳转：让溯源从理念变成功能</h3>
+
+<p>溯源这件事，很多人停留在理念层面："应该注明来源"&mdash;&mdash;注了，然后呢？如果读者要验证这条信息，他需要打开另一个文件，翻到对应章节，找到具体的段落，对比原文和引用&mdash;&mdash;这个摩擦太高了，大部分人不会做。</p>
+
+<p><strong>Obsidian 的 wikilink 引擎改变了这个局面。</strong><code>[[来源#^block-id]]</code> 在 Obsidian 中不是一段静态文本，而是一个可点击的超链接。点击 <code>📖</code> 图标，Obsidian 直接跳转到原始文件中的对应块，并高亮显示。</p>
+
+<div class="flow">
+  <div class="flow-item">Mosaic 页面中<br/>看到一条信息</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">点击信息末尾的<br/><code>📖</code> 溯源标记</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">Obsidian 跳转到<br/>原始资料的对应块</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">瞬间验证<br/>"原文是不是这么说的"</div>
+</div>
+
+<p>从"理念上的可溯源"到"功能上的可溯源"，Wikilink 是关键。它把"你应该去验证"变成了"你想验证就能一键验证"。</p>
+
+<h3>双栏浏览：左侧资料，右侧 Mosaic</h3>
+
+<p>有了 wikilink 跳转之后，一个自然衍生的工作流就是<strong>双栏浏览</strong>。在 Obsidian 中打开两个并排面板：</p>
+
+<pre><code>┌─────────────────────────────────┬─────────────────────────────────┐
+│       左：原始资料               │       右：Mosaic 页面            │
+│                                 │                                 │
+│  sources/nianpu-j01.md          │  entities/苏轼本人.md            │
+│                                 │                                 │
+│  嘉祐二年（1057）三月，仁宗      │  ## 嘉祐二年                     │
+│  御崇政殿试...                  │  三月，苏轼与苏辙同科进士及第。   │
+│  主考官欧阳修得苏轼《刑赏        │  欧阳修误以为门生曾巩所作，      │
+│  忠厚之至论》...                │  抑为第二。                      │
+│  ^nianpu-j01-L2233              │  [[nianpu-j01#^nianpu-j01-L2233]]│
+│                                 │                                 │
+└─────────────────────────────────┴─────────────────────────────────┘</code></pre>
+
+<p>左边的原始资料是"不可修改的真相来源"，右边的 Mosaic 页面是"编织后的信息呈现"。你在右边写，左边做参照；右边有任何不确定的地方，一秒就能跳回左边验证。</p>
+
+<div class="tip">双栏浏览在 Obsidian 中的操作：打开第一个文件 → 按住 <code>Cmd</code>（Windows 是 <code>Ctrl</code>）再点击第二个文件 → 第二个文件会在右侧面板打开。或者右键点击文件 → 选择"在新面板中打开"。</div>
+
+<h3>溯源不是负担，是加速器</h3>
+
+<p>有人会觉得："每条信息都要溯源，是不是太累了？"</p>
+
+<p>这个想法搞反了因果。溯源机制不是 LLM Mosaic <strong>额外的负担</strong>，而是 LLM Mosaic <strong>存在的理由</strong>。没有逐条溯源，你创建的内容和直接让 ChatGPT 写一篇"苏轼生平"没有本质区别&mdash;&mdash;都是一堆看起来可信但无法验证的文字。</p>
+
+<p>而且溯源在实际使用中扮演的不是"校验者"的角色，而是<strong>"加速器"</strong>：</p>
+
+<ul>
+  <li>当你在一周后回到一个 Mosaic 页面，想确认某条信息是否准确时，溯源标记让你 3 秒验证，而不是重新翻所有资料。</li>
+  <li>当 LLM 重新编译一个页面时，溯源标记给了它一个精确的"参考点"，避免重复提取、重复推理。</li>
+  <li>当你发现某个来源出错了（比如你后来发现年谱中某条记录的时间有误），溯源标记让你迅速定位所有受影响的 Mosaic 页面，批量修正。</li>
+</ul>
+
+<p><strong>溯源是 LLM Mosaic 的"质量基础设施"</strong>&mdash;&mdash;你在上面花的每一分钟，都会在后续的每一次使用、更新、验证中省下至少十分钟。</p>
+
+</div>
+
+<!-- ===== part03-tools.html ===== -->
+<div class="content">
+
+<h2 class="section-title page-break" id="part7"><span class="num">§07</span> 工具链全景：Obsidian + Claude Code + Agent</h2>
+<p class="section-en">The Toolchain: Obsidian + Claude Code + Agent</p>
+<p class="section-intro">LLM Mosaic 的工具链由三个核心组件构成一个三角关系——Obsidian 是你的 IDE，Claude Code 是你的引擎，Claudian 是住在这个 IDE 里的 Agent。本节带你理解它们各自做什么、怎么配合。</p>
+
+<h3>三角关系：引擎 → Agent → IDE</h3>
+
+<p>在切入具体安装之前，先把三者的分工讲清楚。我用一个比喻：</p>
+
+<div class="callout">
+<strong>要点：</strong>把 LLM Mosaic 想象成写代码。Obsidian 是你的 VS Code——编辑、跳转、视图管理。Claude Code 是你的编译器——处理、生成、重构。Claudian 是住在 VS Code 里的 Copilot——理解上下文，在你需要的时候帮你补全。
+</div>
+
+<p>具体来说：</p>
+
+<table>
+  <tr><th>角色</th><th>工具</th><th>在 Mosaic 中的职责</th></tr>
+  <tr><td><strong>IDE（集成环境）</strong></td><td>Obsidian</td><td>wikilink 跳转引擎、图谱视图、双栏浏览、YAML 元数据管理、Dataview 查询</td></tr>
+  <tr><td><strong>引擎（计算层）</strong></td><td>Claude Code</td><td>全量扫描原始资料、提取实体、编译 Mosaic 页面、差异标注、交叉引用验证</td></tr>
+  <tr><td><strong>Agent（理解层）</strong></td><td>Claudian 插件</td><td>理解当前笔记的 wikilink 上下文、读写 YAML front matter、执行 Dataview 查询、提供上下文感知的对话</td></tr>
+</table>
+
+<div class="flow">
+  <div class="flow-item">Claude Code<br><small>（引擎）</small></div>
+  <div class="flow-arrow">←→</div>
+  <div class="flow-item">Claudian<br><small>（Agent）</small></div>
+  <div class="flow-arrow">←→</div>
+  <div class="flow-item">Obsidian<br><small>（IDE）</small></div>
+</div>
+
+<h3>为什么选 Obsidian 而不是 Notion</h3>
+
+<p>这个问题必须正面回答。Notion 很好，但它做不了 LLM Mosaic 的 IDE。</p>
+
+<div class="compare">
+  <div class="compare-good">
+    <strong>Obsidian</strong>
+    <ul>
+      <li>数据在本地，纯 Markdown 文件，Claude Code 可以直接读写</li>
+      <li>wikilink（<code>[[苏东坡]]</code>）是原生跳转引擎——点一下跳过去，不需要链接管理</li>
+      <li>图谱视图让你一眼看到"哪些实体被频繁引用"</li>
+      <li>双栏浏览：左边看苏东坡的 Mosaic 页面，右边打开林语堂写的原文段落</li>
+      <li>社区插件生态：Dataview 可以做矩阵查询，Claudian 可以做 AI 对话</li>
+    </ul>
+  </div>
+  <div class="compare-bad">
+    <strong>Notion</strong>
+    <ul>
+      <li>数据在云端，API 有速率限制，AI 操作不灵活</li>
+      <li>数据库关联 ≠ wikilink，做不到"点一下跳到原文第 152 行"</li>
+      <li>没有图谱视图，看不出知识网络结构</li>
+      <li>双栏浏览需要手动开两个标签页，没有 Obsidian 的链接预览和局部跳转</li>
+      <li>AI 能力强大但对本地文件的读写不如 Claude Code 灵活</li>
+    </ul>
+  </div>
+</div>
+
+<p>简单说：<strong>Notion 是知识库，Obsidian 是知识 IDE。</strong>LLM Mosaic 需要的是一个 AI 能直接读写、人能直接跳转的文件系统，不是一套 API 包裹的云端数据库。</p>
+
+<h3>Obsidian 的三个关键角色</h3>
+
+<p>在 Mosaic 工作流里，Obsidian 承担的不只是"写笔记"。它有三个功能直接决定了 Mosaic 的可用性：</p>
+
+<h4>角色一：wikilink 跳转引擎</h4>
+
+<p>Mosaic 页面里每条说法都带一个块级引用链接，像这样：</p>
+
+<pre><code>林语堂认为王安石"刚愎自用，不近人情"。[[林语堂·苏东坡传#^nianpu-j03-L0152]]</code></pre>
+
+<p>你在 Obsidian 里点一下 <code>[[林语堂·苏东坡传#^nianpu-j03-L0152]]</code>，它直接跳到林语堂原文的第 152 行。不用翻书、不用搜索、不用记住页码——这就是 <strong>wikilink + 块级引用</strong> 的威力。</p>
+
+<p>这个跳转是 Obsidian 原生的。你不需要任何插件就能做到。</p>
+
+<h4>角色二：图谱视图</h4>
+
+<p>打开图谱视图（Graph View），你会看到一张由 wikilink 连接的网络。每个节点是一个笔记，每条边是一个引用。</p>
+
+<p>在建 Mosaic 的过程中，图谱视图能帮你做两件事：</p>
+
+<ul>
+  <li><strong>发现漏掉的实体：</strong>图谱中央一定是被引用最多的实体（比如"苏东坡""王安石""乌台诗案"）。如果某个你应该覆盖的实体在图谱上只有一两条连线，说明原始资料里提到它的地方还没被充分提取。</li>
+  <li><strong>检查孤立的原始资料：</strong>如果某本传记的笔记孤零零地飘在图谱边缘、没有和任何 Mosaic 页面连接，说明这本传记的内容还没被整合进系统。</li>
+</ul>
+
+<h4>角色三：双栏浏览</h4>
+
+<p>这是 Mosaic 日常使用中最常用的姿势：</p>
+
+<ul>
+  <li><strong>左边：</strong>打开一个 Mosaic 页面，比如"王安石"</li>
+  <li><strong>右边：</strong>打开一份原始资料的节选，或者另一个 Mosaic 页面做对比</li>
+</ul>
+
+<p>快捷键 <code>Cmd+拖拽链接</code>（Windows: <code>Ctrl+拖拽</code>）在新面板打开链接。用熟了，查 Mosaic 页面和溯源原文之间来回切不超过两秒。</p>
+
+<h3>Claude Code：像操作代码库一样操作知识库</h3>
+
+<p>Claude Code 是 Anthropic 的命令行 LLM 编码工具。在 Mosaic 工作流里，你不让它写代码——你让它操作 Markdown 文件。</p>
+
+<p>它做的事包括：</p>
+
+<ul>
+  <li><strong>读文件：</strong>读一整本转换成 Markdown 的传记，理解它的行文结构和叙事重点</li>
+  <li><strong>写文件：</strong>根据原始资料，生成新的 Mosaic 页面（Markdown 文件）</li>
+  <li><strong>搜索：</strong>在几十个 Markdown 文件里找"所有提到王安石的地方"</li>
+  <li><strong>重构：</strong>把 Mosaic 页面中的引用统一为新的编号体系</li>
+  <li><strong>交叉引用：</strong>检查"林语堂说王安石不近人情"和"李一冰说王安石关心民生"是否引用了同一件事的不同侧面</li>
+</ul>
+
+<div class="tip">
+<strong>提示：</strong>Claude Code 的最大优势是<strong>直接操作本地文件</strong>。它不需要 API、不需要 connector、不需要把数据搬到云端。你的 Markdown 文件在哪，它就在哪工作。这对于 Mosaic 意味着：你可以用 Claude Code 批量处理成百上千个块级引用，而不用一行一行手动粘贴。
+</div>
+
+<h3>Claudian：住在 Obsidian 里的 Agent</h3>
+
+<p>Claudian 是 Obsidian 的一个社区插件，它把 Claude 直接嵌入 Obsidian 编辑器。</p>
+
+<p>和 Claude Code 不同的是，Claudian <strong>理解你当前的上下文</strong>：</p>
+
+<ul>
+  <li>它知道你正打开哪个笔记</li>
+  <li>它知道这个笔记链接了哪些笔记（通过 wikilink）</li>
+  <li>它知道你的 YAML front matter 里有什么元数据</li>
+  <li>它可以在对话中直接引用你笔记里的内容</li>
+</ul>
+
+<p>举个例子：你打开"王安石"的 Mosaic 页面，对 Claudian 说"帮我检查这个页面里所有引用的块 ID 还存在不存在"，Claudian 会遍历每个 <code>^nianpu-jXX-LYYYY</code> 引用，去对应的原始资料文件里找，告诉你哪些已经失效。</p>
+
+<p>这种 "上下文感知" 是 Claude Code 做不到的——Claude Code 每次都是一个全新的会话，它不知道 Obsidian 里打开了哪些文件。</p>
+
+<div class="callout">
+<strong>要点：</strong>Claude Code 做<strong>批量操作</strong>（扫描 10 本传记、生成 50 个 Mosaic 页面），Claudian 做<strong>上下文操作</strong>（在当前笔记里查引用、改一段话、补充一条标注）。各司其职，不用一个工具硬撑所有场景。
+</div>
+
+<h3>安装与配置</h3>
+
+<p>以下是完整的安装步骤。假设你用的是 macOS，Windows 用户把 <code>brew</code> 换成 <code>choco</code> 或 <code>scoop</code> 即可。</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>安装 Obsidian</h4>
+    <p>去 <a href="https://obsidian.md">obsidian.md</a> 下载安装。新建一个 vault，比如叫 <code>Mosaic</code>。这个 vault 就是你的 LLM Mosaic 工作空间。</p>
+    <p>创建以下文件夹结构：</p>
+    <pre><code>Mosaic/
+├── 原始资料/        # 只读的源材料（EPUB/PDF 转成的 MD）
+├── Mosaic/          # Mosaic 页面（实体 × 来源矩阵）
+├── 模板/            # Mosaic 页面模板
+├── 输出/            # 从 Mosaic 衍生出的文章、报告
+└── .obsidian/       # Obsidian 配置（自动创建）</code></pre>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>安装 Claude Code</h4>
+    <p>打开终端，执行：</p>
+    <pre><code># macOS
+brew install claude-code
+
+# 或者用 npm（跨平台）
+npm install -g @anthropic-ai/claude-code
+
+# 验证安装
+claude --version</code></pre>
+    <p>首次运行需要配置 API key：</p>
+    <pre><code>export ANTHROPIC_API_KEY="sk-ant-xxxxx"</code></pre>
+    <p>建议把这个写到 <code>~/.zshrc</code> 或 <code>~/.bashrc</code> 里持久化。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>安装 Claudian 插件</h4>
+    <p>打开 Obsidian → Settings → Community plugins → 搜索 "Claudian" → Install → Enable。</p>
+    <p>在插件设置里填入同样的 Anthropic API key，选择模型（推荐 Claude Sonnet 或 Opus）。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h4>创建 CLAUDE.md 说明书</h4>
+    <p>在 vault 根目录创建 <code>CLAUDE.md</code>，这是 Claude Code 的"项目说明书"。每次 Claude Code 在这个目录下运行时都会先读它。</p>
+  </div>
+</div>
+
+<h3>CLAUDE.md 模板</h3>
+
+<p>以下是我在苏东坡 Mosaic 项目中使用的 CLAUDE.md。直接抄过去，改一下项目名：</p>
+
+<pre><code># LLM Mosaic: 苏东坡研究
+
+## 项目结构
+- 原始资料/     → 只读。包含 4 本传记转成的 Markdown
+- Mosaic/       → Mosaic 页面，每个实体一个文件，命名 = 实体名.md
+- 模板/         → Mosaic 页面模板，包含 entity-index 的标准格式
+- 输出/         → 从 Mosaic 合成的衍生内容（文章、对比分析等）
+
+## 核心原则
+1. **汇集，不编译。** 把多份来源对同一实体的说法一字排开，不合并、不替读者判断
+2. **逐条溯源。** 每条说法必须带块级引用，格式：[[来源文件#^block-id]]
+3. **差异标注。** 当两个来源对同一件事的说法矛盾时，明确标注差异，不模糊处理
+
+## 块级引用命名规范
+- 格式：^nianpu-jXX-LYYYY
+- XX = 卷号（两位数）：j01、j02、j03、j04
+- YYYY = 行号（四位数）：L0001、L0152、L1230
+
+## Mosaic 页面标准格式
+每个 Mosaic 页面包含：
+- YAML front matter: entity, tags, sources, created, updated
+- 概述
+- 来源矩阵（来源 | 说法 | 引用 | 标注）
+- 差异注记
+- 待办
+
+## 文件命名规则
+- 原始资料：作者·书名.md（如：林语堂·苏东坡传.md）
+- Mosaic 页面：实体名.md（如：苏东坡.md、王安石.md、乌台诗案.md）
+- 全部使用中文文件名，不用拼音
+
+## 操作规范
+- 原始资料/ 目录下的文件标记为只读，绝不修改
+- 修改 Mosaic 页面时先读后写，保留已有的标注和引用
+- 新增实体时用 entity-index 模板
+- 改动命名规范或格式时，同步更新所有已有页面</code></pre>
+
+<div class="tip">
+<strong>提示：</strong>CLAUDE.md 的核心价值不是"把项目规则写下来"——而是让 Claude Code <strong>每次启动时自动读取</strong>。这意味着你的规则不用每次都重新描述，节省大量 token 和心力。
+</div>
+
+<h3>其他可选工具对比</h3>
+
+<p>如果你的场景不适合 Obsidian + Claude Code 的组合，以下是一些替代方案：</p>
+
+<h4>IDE 替代</h4>
+
+<table>
+  <tr><th>工具</th><th>适合场景</th><th>短板</th></tr>
+  <tr><td><strong>Obsidian</strong></td><td>本地优先、需要 wikilink 跳转和图谱</td><td>没有原生协作编辑</td></tr>
+  <tr><td><strong>Logseq</strong></td><td>日记驱动的工作流、大纲式笔记</td><td>wikilink 跳转和双栏浏览不如 Obsidian 流畅</td></tr>
+  <tr><td><strong>VS Code + Markdown 插件</strong></td><td>纯文本编辑、不依赖 Obsidian 特有功能</td><td>没有图谱视图、wikilink 跳转需额外配置</td></tr>
+  <tr><td><strong>Notion</strong></td><td>团队协作、需要数据库关联</td><td>AI 无法直接读写本地文件，块级引用不原生</td></tr>
+</table>
+
+<h4>LLM 引擎替代</h4>
+
+<table>
+  <tr><th>工具</th><th>适合场景</th><th>短板</th></tr>
+  <tr><td><strong>Claude Code</strong></td><td>本地文件操作、长文本理解、结构生成</td><td>需要 Anthropic API</td></tr>
+  <tr><td><strong>OpenAI Codex / GPT-4o</strong></td><td>有 OpenAI 偏好、已有 ChatGPT Plus</td><td>文件操作不如 Claude Code 灵活，需自行管理上下文</td></tr>
+  <tr><td><strong>Cursor</strong></td><td>想要 VS Code 集成的 AI 体验</td><td>偏代码编辑，Markdown 知识管理非核心场景</td></tr>
+</table>
+
+<p>选工具的原则就一条：<strong>你的 LLM Mosaic 是用 Markdown 文件组成的本地知识系统。</strong>工具只要能读写 Markdown 文件、能理解 wikilink、能批量操作，就是好工具。不要为了一个花哨的功能换掉整个工作流。</p>
+
+</div>
+
+<!-- §08 -->
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part8"><span class="num">§08</span> 原始资料入库管线</h2>
+<p class="section-en">Raw Material Ingestion Pipeline</p>
+<p class="section-intro">原始资料是 Mosaic 的「原料」。EPUB、PDF、网页——每种格式都有自己的转换路径和坑。本节给你三条管线、一份双轨制收藏方案，以及每种格式的具体命令。</p>
+
+<div class="callout">
+<strong>要点：</strong>入库不是"把文件拖进文件夹"。入库是把异构格式（EPUB/PDF/网页）统一转成结构化 Markdown，并存放到 <code>原始资料/</code> 目录下标记只读。这一步的转换质量直接决定了后续块级引用的准确度。
+</div>
+
+<h3>三种格式，三条管线</h3>
+
+<p>你遇到的原始资料大概分三类：EPUB（电子书）、PDF（论文 / 扫描件）、网页（博客 / 百科 / 公众号文章）。每条管线的转换工具和注意事项不同。</p>
+
+<div class="flow">
+  <div class="flow-item">EPUB</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">pandoc</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">MD<br><small>（有 ## 章节标题）</small></div>
+</div>
+
+<div class="flow">
+  <div class="flow-item">PDF</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">MinerU</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">MD<br><small>（无章节标题，需块级引用）</small></div>
+</div>
+
+<div class="flow">
+  <div class="flow-item">网页</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">Web Clipper</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">MD<br><small>（含元数据 YAML）</small></div>
+</div>
+
+<h3>管线一：EPUB → pandoc → MD</h3>
+
+<p>EPUB 是电子书的主流格式，本质是一个 HTML 压缩包。pandoc 把它转成 Markdown，保留章节结构。</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>安装 pandoc</h4>
+    <pre><code># macOS
+brew install pandoc
+
+# 验证
+pandoc --version</code></pre>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>执行转换</h4>
+    <pre><code># 基本转换
+pandoc 林语堂·苏东坡传.epub -t markdown -o /tmp/output.md
+
+# 推荐：保留更多结构信息
+pandoc 林语堂·苏东坡传.epub \
+  -t markdown \
+  --wrap=none \
+  --markdown-headings=atx \
+  -o 原始资料/林语堂·苏东坡传.md</code></pre>
+    <p>参数说明：</p>
+    <ul>
+      <li><code>--wrap=none</code>：不自动折行，保持原文的段落结构</li>
+      <li><code>--markdown-headings=atx</code>：使用 <code>##</code> 风格标题（而非下划线风格），方便后续搜索和分段</li>
+    </ul>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>检查与清理</h4>
+    <p>pandoc 转换后通常需要手动检查：</p>
+    <ul>
+      <li>章节标题是否正确识别（应该以 <code>##</code> 开头）</li>
+      <li>图片路径是否有效（epub 中的图片通常需要手动提取）</li>
+      <li>脚注和尾注是否正确转换</li>
+    </ul>
+    <p>放到 <code>原始资料/</code> 目录后，在文件头部加一个 YAML front matter：</p>
+    <pre><code>---
+title: 苏东坡传
+author: 林语堂
+format: EPUB→MD (pandoc)
+original_file: 林语堂·苏东坡传.epub
+converted: 2026-07-01
+readonly: true
+---</code></pre>
+  </div>
+</div>
+
+<div class="tip">
+<strong>提示：</strong>pandoc 转换 EPUB 的效果取决于出版商制作 EPUB 时对结构的标注质量。好的 EPUB（如 O'Reilly 技术书）转换后标题层级清晰；差的 EPUB（比如某些盗版扫描书转的）可能一整章混在一个段落里。遇到后者，考虑用 PDF 管线。
+</div>
+
+<h3>管线二：PDF → MinerU → MD</h3>
+
+<p>PDF 是最常见的学术资料格式，也是最难处理的。三个原因：</p>
+<ul>
+  <li>PDF 不区分"正文""标题""页眉""页码"——它们是按位置画上去的</li>
+  <li>双栏排版、表格、脚注都会打乱文本提取的顺序</li>
+  <li>扫描件 PDF 需要 OCR，识别率决定最终质量</li>
+</ul>
+
+<p>MinerU 是目前处理 PDF 最靠谱的开源工具之一，专为 LLM 预处理设计。</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>安装 MinerU</h4>
+    <pre><code># 推荐用 uv 安装（MinerU 依赖较重）
+pip install magic-pdf
+
+# 或者用 Docker（如果不想搞环境）
+docker pull opendatalab/mineru:latest</code></pre>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>执行转换</h4>
+    <pre><code># 命令行转换
+magic-pdf -p 李一冰·苏东坡新传.pdf -o 原始资料/
+
+# 输出：原始资料/李一冰·苏东坡新传/李一冰·苏东坡新传.md</code></pre>
+    <p>MinerU 会自动处理：</p>
+    <ul>
+      <li>双栏排版的阅读顺序恢复</li>
+      <li>页眉页脚过滤</li>
+      <li>表格提取（转成 Markdown 表格）</li>
+      <li>公式识别（转成 LaTeX）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>重要注意事项</h4>
+    <p>MinerU 转出的 Markdown <strong>不会自动生成章节标题</strong>。它按 PDF 的物理结构提取文本，但如果原 PDF 的章标题不是用"标题字体"标注的，MinerU 识别不出它是标题。</p>
+    <p>这意味着你需要：</p>
+    <ul>
+      <li><strong>手动标注章节边界：</strong>对照原 PDF，在 MD 文件里手动加上 <code>## 第一章 xxx</code> 等标题</li>
+      <li><strong>或使用块级引用绕过：</strong>不依赖章节标题定位，直接对每一行原文埋块 ID（详见 §09）</li>
+    </ul>
+    <p>在苏东坡项目中，我对李一冰的《苏东坡新传》采用了第二种方案——因为这本书的章结构复杂，手动标注标题工作量大且容易出错。直接用块级引用定位到行，比依赖章节标题更精确。</p>
+  </div>
+</div>
+
+<div class="warning">
+<strong>警告：</strong>扫描件 PDF 的转换质量取决于 OCR 准确度。MinerU 内置 OCR 引擎，但对模糊扫描件（比如 1970 年代的港版书扫描本），识别率可能掉到 90% 以下。对于这类资料，建议先用 Adobe Acrobat 或 ABBYY FineReader 做一次高质量 OCR，再用 MinerU 提取结构。
+</div>
+
+<h3>管线三：网页 → Web Clipper → MD</h3>
+
+<p>网页是最轻量的来源。Obsidian 官方的 Web Clipper 浏览器插件（Chrome/Firefox/Safari）能把网页一键转成 Markdown。</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>安装 Web Clipper</h4>
+    <p>浏览器插件商店搜索 "Obsidian Web Clipper" → 安装 → 配置你的 vault 路径。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>配置模板</h4>
+    <p>Web Clipper 支持自定义输出模板。推荐配置：</p>
+    <pre><code>---
+title: "{{title}}"
+source: "{{url}}"
+author: "{{author}}"
+date_saved: "{{date}}"
+format: web
+readonly: true
+tags: [web-clip]
+---
+
+# {{title}}
+
+{{content}}</code></pre>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>剪藏与入库</h4>
+    <p>浏览网页 → 点击 Web Clipper 图标 → 选择"原始资料"文件夹 → 保存。</p>
+    <p>保存后移到 <code>原始资料/</code> 目录，文件名格式：<code>来源_标题.md</code>（如 <code>维基百科_王安石变法.md</code>）。</p>
+  </div>
+</div>
+
+<h3>双轨制收藏方案</h3>
+
+<p>这是我实践出来的一套方案，解决一个具体问题：</p>
+
+<div class="callout">
+<strong>问题：</strong>公众号文章在微信里看到的，没法用 Web Clipper 收藏。中文互联网的大量优质内容在公众号生态里，不收藏就丢了。
+</div>
+
+<p>解决方案：<strong>双轨并行。</strong></p>
+
+<table>
+  <tr><th>来源类型</th><th>收藏工具</th><th>存放位置</th><th>何时转成 MD</th></tr>
+  <tr><td>电子书 (EPUB)</td><td>pandoc</td><td>原始资料/</td><td>立即转换</td></tr>
+  <tr><td>论文/扫描件 (PDF)</td><td>MinerU</td><td>原始资料/</td><td>立即转换</td></tr>
+  <tr><td>网页 (含博客、百科)</td><td>Obsidian Web Clipper</td><td>原始资料/</td><td>剪藏时自动转换</td></tr>
+  <tr><td>公众号文章</td><td>ima（腾讯知识库工具）</td><td>ima 云端知识库</td><td>需要用时手动导出为 MD</td></tr>
+</table>
+
+<p><strong>ima 的角色：</strong>它作为公众号文章的"暂存区"。你在微信里看到一篇关于苏轼生平的好文章，分享到 ima 收藏。当你准备开始 Mosaic 项目时，把相关文章从 ima 导出为 Markdown，放到 <code>原始资料/</code> 目录下。</p>
+
+<p>ima 不是 Mosaic 工作流的核心工具，但它解决了公众号内容"收藏即消失"的痛点。</p>
+
+<h3>图片本地化</h3>
+
+<p>原始资料中经常包含图片——书中的插图、PDF 里的图表、网页上的截图。你需要把它们存到本地，否则 Mosaic 页面引用时图片会丢失。</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>设置附件文件夹</h4>
+    <p>Obsidian → Settings → Files & Links → Default location for new attachments → "In subfolder under current folder" → 输入 <code>attachments</code>。</p>
+    <p>这样每个笔记的图片会自动存到 <code>当前目录/attachments/</code> 下。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>下载图片到本地</h4>
+    <p>如果你从网页剪藏，图片通常是外链 URL。下载到本地的命令：</p>
+    <pre><code># 批量下载图片并替换链接（macOS/Linux）
+cd 原始资料/
+for img in $(grep -oP '!\[.*\]\(\Khttps?://[^)]+' *.md); do
+  curl -s "$img" -o "attachments/$(basename "$img")"
+  sed -i '' "s|$img|attachments/$(basename "$img")|g" *.md
+done</code></pre>
+    <p>当然，更简单的方式是用 Obsidian 的 "Download All Images" 插件一键完成。</p>
+  </div>
+</div>
+
+<div class="warning">
+<strong>警告：</strong>EPUB 中的图片是嵌在压缩包里的，pandoc 默认不会提取。如果你需要转化后的 MD 包含本地图片，需要在转换后手动提取 EPUB 中的图片文件夹（EPUB 本质是 zip，可以直接解压查看图片），或者在 Obsidian 中手动插入。
+</div>
+
+<h3>标记只读</h3>
+
+<p>最后一步也是最容易忘的一步：</p>
+
+<pre><code># 在 Obsidian 中标记只读
+# 方法一：在文件属性中加 readonly: true (YAML)
+# 方法二：在系统层面设置只读属性
+chmod 444 原始资料/*.md</code></pre>
+
+<p>为什么必须设只读？因为 <strong>原始资料是"证据"，不能被修改</strong>。如果你在处理 Mosaic 页面时不小心改了原文——比如删了一行、改了一个字——后面所有对这条原文的引用都变成了"引用了一个不存在的东西"。</p>
+
+<p>在苏东坡项目中，我曾经不小心在原始资料文件里多打了一个回车，结果三条块级引用全坏了。从那以后，<code>chmod 444</code> 成了入库的最后一步——绝不跳过。</p>
+
+</div>
+
+<!-- §09 -->
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part9"><span class="num">§09</span> 块级引用实战：埋法与格式</h2>
+<p class="section-en">Block-Level Citation: Implementation & Format</p>
+<p class="section-intro">块级引用是 LLM Mosaic 溯源体系的核心机制。本节带你从编号体系设计、三种埋法到 Mosaic 页面引用格式，用苏东坡项目的真实例子一步步实操。</p>
+
+<h3>为什么需要块级引用</h3>
+
+<p>传统引用的做法是"林语堂在《苏东坡传》第 152 页说……"。问题在哪？</p>
+
+<ul>
+  <li>你用的是电子版，页码和你手上的纸质版不一样</li>
+  <li>"第 152 页"指向一整页内容，读者不知道具体是哪句话</li>
+  <li>转成 Markdown 后，原来的页码全丢了</li>
+</ul>
+
+<p><strong>块级引用解决了这三个问题：</strong>它指向一个 <strong>精确的段落或句子</strong>，而不是一页。它用块 ID 而不是页码。它和 Markdown 原生兼容——Obsidian 点一下就能跳过去。</p>
+
+<div class="compare">
+  <div class="compare-good">
+    <strong>块级引用</strong>
+    <pre><code>[[林语堂·苏东坡传#^nianpu-j03-L0152]]</code></pre>
+    <p>点一下 → 跳到原文第 152 行，高亮具体段落</p>
+  </div>
+  <div class="compare-bad">
+    <strong>传统引用</strong>
+    <pre><code>（林语堂《苏东坡传》，p.152）</code></pre>
+    <p>读者需要翻书 → 找到第 152 页 → 自己猜哪句话</p>
+  </div>
+</div>
+
+<h3>编号体系设计</h3>
+
+<p>块 ID 不是随便起的。一个清晰、可读、可扩展的编号体系，是 Mosaic 规模化的基础。</p>
+
+<p>我在苏东坡项目中的编号格式：</p>
+
+<pre><code>^nianpu-jXX-LYYYY</code></pre>
+
+<p>拆解一下：</p>
+
+<ul>
+  <li><strong>nianpu：</strong>项目前缀，标识这是"苏东坡年谱"项目。如果你做判例分析，可以叫 <code>panli</code>；做竞品分析，可以叫 <code>jingpin</code></li>
+  <li><strong>jXX：</strong>卷号，两位数字。<code>j01</code> = 第一卷（林语堂），<code>j02</code> = 第二卷（李一冰），以此类推</li>
+  <li><strong>LYYYY：</strong>行号，<code>L</code> + 四位数字。<code>L0001</code> = 第 1 行，<code>L1523</code> = 第 1523 行</li>
+</ul>
+
+<p>这个编号体系的好处：</p>
+
+<ul>
+  <li><strong>可读：</strong>一看 <code>^nianpu-j02-L1523</code> 就知道是"第二卷（李一冰）的第 1523 行"</li>
+  <li><strong>可排序：</strong>按行号排序自动恢复原文顺序</li>
+  <li><strong>可扩展：</strong>加了第五本传记，直接设为 <code>j05</code>，不冲突</li>
+  <li><strong>全局唯一：</strong>加上项目前缀，不同 Mosaic 项目的块 ID 不会撞</li>
+</ul>
+
+<div class="tip">
+<strong>提示：</strong>编号体系不一定要照搬这个格式。核心原则就两条：(1) 能一眼看出属于哪个项目、哪个来源、哪个位置；(2) 能按某种顺序排序。你可以根据自己的项目设计自己的命名规则。
+</div>
+
+<h3>三种块级引用埋法</h3>
+
+<p>在 Obsidian 中，块 ID 有三种埋法，对应三种粒度的引用需求。</p>
+
+<h4>埋法一：行级引用（精确到一句话）</h4>
+
+<p>用在<strong>需要精确引用某一句原文</strong>的场景。比如林语堂评价王安石的一句话：</p>
+
+<pre><code>王安石是个不切实际的理想主义者，他看不到他所谓的新政是在把百姓推向深渊。^nianpu-j01-L0089</code></pre>
+
+<p>在 Mosaic 页面中这样引用：</p>
+
+<pre><code>林语堂认为王安石"是个不切实际的理想主义者"[[林语堂·苏东坡传#^nianpu-j01-L0089]]</code></pre>
+
+<p>优点：引用精度最高，读者点一下就跳到这句话。<br>
+缺点：埋法工作量最大——每句需要引用的话都要单独埋。</p>
+
+<h4>埋法二：段级引用（精确到一个段落）</h4>
+
+<p>用在<strong>段落整体论述一个主题</strong>的场景。块 ID 放在段落末尾的独立一行：</p>
+
+<pre><code>苏轼被贬黄州后，生活极为拮据。他在东坡开荒种地，自号"东坡居士"。这四年间，他写下了《赤壁赋》《念奴娇·赤壁怀古》等传世名篇。可以说，黄州是苏轼从"天才文人"蜕变为"千古第一文人"的关键节点。
+
+^nianpu-j02-L0198</code></pre>
+
+<p>在 Mosaic 页面中这样引用：</p>
+
+<pre><code>李一冰详细描述了黄州时期对苏轼创作的影响[[李一冰·苏东坡新传#^nianpu-j02-L0198]]</code></pre>
+
+<p>优点：减少埋点数量，一个块 ID 覆盖一个完整论述。<br>
+适用场景：Mosaic 页面中不需要逐字引用，只需要"这段话讲了什么"。</p>
+
+<h4>埋法三：注解级引用（带编号格式）</h4>
+
+<p>这是最灵活的一种——块 ID 不是放在段落末尾，而是以<strong>编号注释</strong>的形式独立存在：</p>
+
+<pre><code>苏轼在杭州做通判时，与一位名叫王朝云的歌伎相识。^nianpu-j03-L0420
+
+> [注] 王朝云时年十二岁，苏轼三十七岁。关于二人初识的时间，林语堂记为熙宁四年（1071年），李一冰记为熙宁七年（1074年）。^nianpu-j03-L0421</code></pre>
+
+<p>在 Mosaic 页面中：</p>
+
+<pre><code>关于苏轼与王朝云初识的时间：
+- 林语堂记为 1071 年[[周文翰·苏轼传#^nianpu-j03-L0420]]
+- 李一冰记为 1074 年[[周文翰·苏轼传#^nianpu-j03-L0421]]
+
+⚠️ 差异注记：两说相差三年，原因待查。</code></pre>
+
+<p>注解级引用的核心优势：<strong>把"事实陈述"和"批注/辨析"分开引用。</strong>正文块 ID 指向事实描述，注释块 ID 指向作者的分析或存疑。</p>
+
+<h3>共享规则：同一行原文可被多个 Mosaic 页面引用</h3>
+
+<p>这是块级引用体系的一个重要特性：<strong>同一个块 ID 可以被无限多个 Mosaic 页面引用。</strong></p>
+
+<p>举个例子，林语堂《苏东坡传》中有一段话：</p>
+
+<pre><code>王安石推行青苗法，本意是减轻农民负担。但执行过程中，地方官员为追求政绩，强制摊派，导致农民负担反增。苏轼多次上书反对，认为此法"名为惠民，实为扰民"。^nianpu-j01-L0350</code></pre>
+
+<p>这段原文同时被三个 Mosaic 页面引用：</p>
+
+<ul>
+  <li><strong>Mosaic/王安石.md：</strong>"林语堂记载王安石推行青苗法的原始动机是'减轻农民负担'[[林语堂·苏东坡传#^nianpu-j01-L0350]]"</li>
+  <li><strong>Mosaic/青苗法.md：</strong>"林语堂评价青苗法的执行效果为'名为惠民，实为扰民'[[林语堂·苏东坡传#^nianpu-j01-L0350]]"</li>
+  <li><strong>Mosaic/苏轼.md：</strong>"苏轼曾'多次上书反对'青苗法[[林语堂·苏东坡传#^nianpu-j01-L0350]]"</li>
+</ul>
+
+<p>三个不同主题的 Mosaic 页面，引用同一段原文的不同侧面。<strong>块 ID 不变，视角切换。</strong>这正是 Mosaic"汇集不编译"理念在引用层的体现。</p>
+
+<div class="callout">
+<strong>要点：</strong>块 ID 的设计目标不是"每个引用位置有一个 ID"，而是"每个原文段落有一个 ID"。同一个 ID 被多个 Mosaic 页面引用是正常现象，说明这段原文在多个实体中都相关。如果你发现同一个 ID 被 10 个以上页面引用了——恭喜，你找到了一个"枢纽事实"。
+</div>
+
+<h3>反模式：一行堆多个块 ID</h3>
+
+<div class="compare">
+  <div class="compare-bad">
+    <strong>❌ 不推荐：一行堆多个块 ID</strong>
+    <pre><code>王安石推行青苗法^nianpu-j01-L0350-a，苏轼反对^nianpu-j01-L0350-b，最终失败^nianpu-j01-L0350-c。</code></pre>
+    <p>问题：Obsidian 会把这些全识别为<strong>同一段</strong>的多个 ID，跳转行为不可预测。而且 <code>-a/-b/-c</code> 后缀破坏了编号体系的整洁性。</p>
+  </div>
+  <div class="compare-good">
+    <strong>✅ 推荐：分句 + 分段</strong>
+    <pre><code>王安石推行青苗法，本意是减轻农民负担。^nianpu-j01-L0350
+
+但执行过程中地方官员强制摊派，百姓负担反增。
+
+苏轼多次上书反对，认为此法"名为惠民，实为扰民"。^nianpu-j01-L0351</code></pre>
+    <p>每段引用自己需要的部分，块 ID 各管各的。</p>
+  </div>
+</div>
+
+<h3>Mosaic 页面中的引用格式</h3>
+
+<p>前面讲的是"怎么埋"，现在讲"怎么用"——Mosaic 页面中引用块 ID 的两种格式。</p>
+
+<h4>格式一：章节引用（行内）</h4>
+
+<p>适合在正文中自然引用：</p>
+
+<pre><code>林语堂认为王安石"刚愎自用，不近人情"[[林语堂·苏东坡传#^nianpu-j01-L0152]]，而李一冰评价他"心怀天下，志在民生"[[李一冰·苏东坡新传#^nianpu-j02-L0234]]。</code></pre>
+
+<p>这种格式的优势是<strong>可读性好</strong>——不看块 ID 也能顺畅读下去。适合综述类段落。</p>
+
+<h4>格式二：块级引用表</h4>
+
+<p>适合在 Mosaic 页面的"来源矩阵"中使用，把不同来源的说法结构化列出：</p>
+
+<pre><code>## 来源矩阵：王安石的人格评价
+
+| 来源 | 说法 | 引文 | 块级引用 |
+|------|------|------|----------|
+| 林语堂·苏东坡传 | 负面：刚愎自用 | "刚愎自用，不近人情" | [[林语堂·苏东坡传#^nianpu-j01-L0152]] |
+| 李一冰·苏东坡新传 | 正面：志在民生 | "心怀天下，志在民生......虽有失误，其志可佩" | [[李一冰·苏东坡新传#^nianpu-j02-L0234]] |
+| 周文翰·苏轼传 | 中性：理想与现实的冲突 | "王安石的悲剧在于，他用古代的理想去改造现代的社会" | [[周文翰·苏轼传#^nianpu-j03-L0098]] |
+| 祝勇·苏东坡传 | 历史语境化 | "放在11世纪的中国，王安石的改革方案超出了技术条件的承载能力" | [[祝勇·苏东坡传#^nianpu-j04-L0341]] |
+
+## 差异注记
+
+⏳ **时间角度：** 林语堂（1947）与李一冰（1980s）写于不同时代，对改革的态度折射了各自的时代的氛围。
+👤 **立场角度：** 林语堂站苏轼视角，李一冰试图跳出苏轼视角做客观评价。
+📜 **史料角度：** 祝勇引用了更多经济史研究，为王安石的"失败"提供了技术层面解释。</code></pre>
+
+<p>这是 Mosaic 页面最核心的格式——<strong>来源矩阵 + 差异注记。</strong> 表格让不同来源的说法一目了然，差异注记解释为什么不同。读者不需要读完四本传记再做判断——他一页就能看见全景。</p>
+
+<h3>完整示例：从埋块 ID 到引用</h3>
+
+<p>下面用一个完整的示例串起来，模拟一次真实的工作流。</p>
+
+<p><strong>场景：</strong>为"乌台诗案"这个实体建一个 Mosaic 页面。你需要从四本传记里提取关于乌台诗案的不同说法。</p>
+
+<h4>第 1 步：在原始资料中埋块 ID</h4>
+
+<p>以林语堂《苏东坡传》中描写乌台诗案的一段为例：</p>
+
+<pre><code>## 第八章 乌台诗案
+
+元丰二年七月，御史李定、舒亶等人弹劾苏轼，指控他写的诗中"讥讽朝政""愚弄朝廷"。^nianpu-j01-L1050
+
+七月二十八日，苏轼在湖州任上被捕。^nianpu-j01-L1051
+
+他被押解赴京，关进御史台监狱。御史台的院子里种满了柏树，树上栖满乌鸦，所以俗称"乌台"。^nianpu-j01-L1052
+
+在狱中，苏轼遭受了长达一百多天的审讯。审问他的人反复抠他的诗句，逐字寻找"反意"。^nianpu-j01-L1053</code></pre>
+
+<h4>第 2 步：在其他三本传记中也做类似的块 ID 标注</h4>
+
+<p>李一冰的版本可能从不同角度写——比如他更强调新旧党争的政治背景；祝勇的版本可能分析得更深——讨论这场文字狱的文化根源。</p>
+
+<h4>第 3 步：建 Mosaic 页面</h4>
+
+<p>新建 <code>Mosaic/乌台诗案.md</code>，填写：</p>
+
+<pre><code>---
+entity: 乌台诗案
+type: 历史事件
+tags: [北宋, 苏轼, 文字狱, 政治斗争]
+sources: [林语堂·苏东坡传, 李一冰·苏东坡新传, 周文翰·苏轼传, 祝勇·苏东坡传]
+created: 2026-07-01
+updated: 2026-07-09
+---
+
+# 乌台诗案
+
+## 概述
+乌台诗案是北宋元丰二年（1079年）发生的一桩文字狱，苏轼因诗获罪，被捕入狱一百余日。此案是苏轼人生的转折点，也是北宋新旧党争的高潮事件之一。
+
+## 来源矩阵：事件经过
+
+| 来源 | 说法 | 块级引用 |
+|------|------|----------|
+| 林语堂·苏东坡传 | 七月御史弹劾苏轼诗文"讥讽朝政"，七月廿八日被捕，关押御史台（乌台），审讯百余日 | [[林语堂·苏东坡传#^nianpu-j01-L1050]] [[林语堂·苏东坡传#^nianpu-j01-L1052]] |
+| 李一冰·苏东坡新传 | 事件根源于王安石变法后的政治清算，李定是借苏轼诗文打击旧党势力 | [[李一冰·苏东坡新传#^nianpu-j02-L0550]] |
+| 周文翰·苏轼传 | 侧重描写狱中苏轼的心理状态和亲友营救过程 | [[周文翰·苏轼传#^nianpu-j03-L0410]] |
+| 祝勇·苏东坡传 | 从文化史角度分析，"乌台诗案"暴露了宋代皇权对文人的控制机制 | [[祝勇·苏东坡传#^nianpu-j04-L0680]] |
+
+## 差异注记
+
+⚖️ **归因差异：** 林语堂偏向"小人陷害"叙事，李一冰强调"制度性迫害"——党争机器的运转不需要特定的小人。
+🔍 **史料选择：** 周文翰使用了苏轼狱中书信作为一手材料，其他几位主要依据后人的记述。
+📐 **解释框架：** 祝勇做了最宏观的分析，把此案放在"中国文化史上文字狱传统"中讨论。
+</code></pre>
+
+<h4>第 4 步：在 Obsidian 中验证</h4>
+
+<p>在 Obsidian 阅读模式下，所有 <code>[[文件#^block-id]]</code> 都会渲染为可点击的链接。点一下 → 原文跳出来 → 高亮对应段落 → 确认引用准确。</p>
+
+<p>如果某个块 ID 跳不过去（原文中的块 ID 被误删或格式不对），Obsidian 会显示为纯文本而非链接——这就提醒你去修复。</p>
+
+<div class="tip">
+<strong>提示：</strong>建议在每个 Mosaic 页面完成后做一次"块 ID 验证"：打开 Mosaic 页面，逐一点击所有块级引用链接，确保每个都能跳转到正确的原始位置。这项工作可以在 Claudian 中一键完成——对它说"检查这个页面里所有块级引用的有效性"。
+</div>
+
+<h3>原则总结</h3>
+
+<p>块级引用的实践原则，提炼成四句话：</p>
+
+<ol>
+  <li><strong>编号有体系：</strong>项目前缀 + 来源编号 + 行号，全局唯一，可读可排序</li>
+  <li><strong>一个块 ID 对应一段原文：</strong>不要在一行里堆多个 ID，不要用后缀区分</li>
+  <li><strong>一段原文可被多处引用：</strong>同一个块 ID 出现在多个 Mosaic 页面是正常且健康的</li>
+  <li><strong>引用后验证：</strong>每个块级引用链接都要点过去确认——索引腐烂是知识系统最致命的慢性病</li>
+</ol>
+
+<p>下一章，我们进入实战篇。用 §07-§09 搭建好的工具和管线，从零开始建一个完整的 LLM Mosaic。</p>
+
+</div>
+
+<!-- ===== part04-practice.html ===== -->
+<div class="content">
+
+<h2 class="section-title page-break" id="part10"><span class="num">§10</span> 第一步：收集资料与全量扫描</h2>
+<p class="section-en">Step 1: Source Collection &amp; Entity Scanning</p>
+<p class="section-intro">入门的第一个动作不是读，是收。把你要研究的主题下所有独立来源收进资料库，再用 LLM 一次性扫出全部人物、事件和概念，你就有了一张导航地图。</p>
+
+<h3>策展第一：什么是好的「独立来源」</h3>
+
+<p>Mosaic 方法能不能立住，材料质量决定了一半。但这个质量不是说「这本写得特别好」——而是说，<strong>它是不是一个独立视角</strong>。</p>
+
+<p>什么叫独立来源？一个简单的判断标准：不同作者、不同的研究方法、各自独立形成对同一历史对象或事件的判断。四本传记可能是四个独立来源，四篇论文可能也是——但如果其中三篇引用了同一篇，那这三个就不独立了。</p>
+
+<div class="callout"><strong>要点：</strong>Mosaic 要的是对同一件事的<strong>不同叙述</strong>，不是把一件事拆成几段让你分头读的拼图。拼图式材料合在一起才完整，Mosaic 式材料每一个都能独立成立，只是各有侧重、各有偏见。</div>
+
+<p>以苏东坡项目为例，我选了这些来源：</p>
+
+<table>
+  <tr><th>来源</th><th>类型</th><th>作者</th><th>视角特征</th></tr>
+  <tr><td>《苏轼年谱》（孔凡礼）</td><td>年谱</td><td>孔凡礼</td><td>编年体，最详尽的事实罗列，三册</td></tr>
+  <tr><td>《苏轼年谱》（王水照）</td><td>年谱</td><td>王水照</td><td>简洁，侧重文学创作系年</td></tr>
+  <tr><td>《苏轼评传》（王水照、朱刚）</td><td>评传</td><td>王水照、朱刚</td><td>思想史视角，重哲学与政治立场</td></tr>
+  <tr><td>《苏东坡传》（李一冰）</td><td>传记</td><td>李一冰</td><td>以诗证史，用作品还原生平</td></tr>
+  <tr><td>《苏轼十讲》（朱刚）</td><td>专题</td><td>朱刚</td><td>十个切面，适合做概念入口</td></tr>
+  <tr><td>《苏东坡新传》（李一冰）</td><td>传记</td><td>李一冰</td><td>同上作者，更详尽的版本</td></tr>
+  <tr><td>《漫话东坡》（莫砺锋）</td><td>随笔</td><td>莫砺锋</td><td>学者随笔，轻量但学术底色扎实</td></tr>
+</table>
+
+<p>七本书，四百万字。孔凡礼和王水照的年谱肯定会有大量重叠，但他们是不同的学者，整理方式和取舍不同——<strong>重叠本身就是信息</strong>：两边都提到的，大概率是史实基础牢的；只有一边提的，可能就是该学者的个人判断。</p>
+
+<div class="tip"><strong>策展原则速查：</strong>（1）至少 3 个独立来源，5-7 个更理想；（2）覆盖不同类型（传记、年谱、专题、学术论文）；（3）不要碰百科和自媒体盘点——它们本身就是二次汇编，不会给你独立视角；（4）优先选有索引或有章节体系的，方便后面定位章节。</div>
+
+<h3>先收完再开始，不要边读边收</h3>
+
+<p>多数人做研究是这样的：找到一本，翻开看看，觉得不错，开始读，读到一半发现提到了某个人物，又去搜那个人物，然后找到另一本书……一个月后，读了七本书的开头，一本都没读完，笔记散落在八个地方。</p>
+
+<div class="compare">
+  <div class="compare-good"><strong>推荐：</strong>第一阶段只做一件事——把所有资料找齐、入库。不读。一个字不读。收齐了就赢了。</div>
+  <div class="compare-bad"><strong>不推荐：</strong>边读边找新资料。信息流不断分叉，一个月后你已经忘了最初想研究什么。</div>
+</div>
+
+<p><strong>为什么要克制自己不去读？</strong>因为你的大脑一旦开始读，就会被第一个作者的叙述框架套住。读到精彩的地方你会兴奋，会开始做笔记，会忘了还有三本书没打开。而 Mosaic 要的是你先看到全貌，再决定关注哪里——而不是跟着第一个导游走完全程。</p>
+
+<h3>入库流程：把一切变成纯文本</h3>
+
+<p>收集完成后，你需要把所有资料统一格式。Mosaic 只认一种格式：<strong>Markdown</strong>。别想着用 PDF 批注、Kindle 高亮——这些工具在「跨来源检索」面前完全失效。你不可能同时搜索七本 PDF。</p>
+
+<div class="flow">
+  <div class="flow-item">EPUB</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">calibre / pandoc</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">MD</div>
+</div>
+
+<div class="flow">
+  <div class="flow-item">PDF</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">marker / docling / LLM 提取</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">MD</div>
+</div>
+
+<div class="flow">
+  <div class="flow-item">网页</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">web_fetch / 复制粘贴</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">MD</div>
+</div>
+
+<p>具体指令，以 EPUB 为例：</p>
+
+<pre><code># 用 pandoc 把 EPUB 转成 Markdown
+pandoc 苏轼评传.epub -t markdown --wrap=none -o 苏轼评传.md
+
+# 如果遇到格式错乱，用 calibre 先转成纯文本
+ebook-convert 苏轼评传.epub 苏轼评传.txt
+</code></pre>
+
+<p>PDF 的处理稍微费点事，但也不复杂：</p>
+
+<pre><code># 方法1：用 marker（开源工具，识别率高）
+marker_single 苏轼年谱.pdf 苏轼年谱_md/ --output_format markdown
+
+# 方法2：直接把 PDF 喂给 LLM
+# "请将以下 PDF 内容提取为 Markdown，保留全部章节结构"
+</code></pre>
+
+<div class="warning"><strong>注意：</strong>PDF 里的表格和脚注可能在转换时丢失，入库后快速浏览一下章节结构是否完整。如果一本书有 30 章但只扫出了 25 章的文件，说明转换有问题，换工具重新试。</div>
+
+<h3>全量实体扫描：一次扫出整张网</h3>
+
+<p>资料入库之后，就可以做 Mosaic 最关键的一步了：<strong>让 LLM 帮你逐本扫描全部人物、事件、概念</strong>。</p>
+
+<p>这一步的原理很简单：一本 10 万字的书，你读完要一周，LLM 读完只要几十秒。你读的时候只能记住「这本书里提到过沈括」，LLM 可以精确告诉你沈括在哪些章节被提过、用的是什么语气、跟哪些事件关联。</p>
+
+<div class="callout"><strong>要点：</strong>实体扫描不是让 LLM 做摘要。摘要是压缩，会丢信息。实体扫描是提取——把书里提到的所有人名、地名、事件名、概念名抽出来，做成索引。信息密度不降，只是换了一种组织形式。</div>
+
+<p>对 AI 说这段话：</p>
+
+<pre><code>我现在给你一本书的 Markdown 全文。请做以下扫描：
+
+1. 提取书中提到的所有【人物】：给出人名、在哪些章节出现、一句话描述书中对这个人物的核心判断。
+2. 提取书中提到的所有【事件】：给出事件名、发生时间、涉及人物、在哪些章节被讨论。
+3. 提取书中提到的所有【概念/主题】：给出概念名、一句话定义、在哪些章节被展开。
+
+格式要求：
+- 每个实体以 "## 实体名" 开头
+- 下面用 "- **章节**: ..." 标注位置
+- 对于人物，标注 "- **核心判断**: ..."（书中对这个人的综合评价）
+- 对于事件，标注 "- **时间**: ..." 和 "- **涉及人物**: ..."
+
+请从第一章开始，逐章扫描，不要跳过任何章节。
+</code></pre>
+
+<p>然后得到一个文件，比如 <code>苏轼评传_entities.md</code>，内容大概是这样的：</p>
+
+<pre><code>## 沈括
+- **章节**: 第三章、第七章、第九章
+- **核心判断**: 博学多才但政治投机，乌台诗案中的角色有争议
+- **关联事件**: 乌台诗案、熙宁变法
+- **关联人物**: 苏轼、王安石、李定
+
+## 乌台诗案
+- **时间**: 元丰二年（1079）
+- **章节**: 第七章（重点论述）、第八章（后续影响）
+- **涉及人物**: 苏轼、李定、舒亶、沈括、王安石、宋神宗
+- **书中判断**: 新旧党争激化的标志性事件，苏轼仕途转折点
+</code></pre>
+
+<p>七本书，逐一过一遍。听起来工作量很大？其实不然。用 API 逐本扫描，每本 10-20 分钟。全部七本，加上 review 的时间，<strong>一个小时左右全部解决</strong>。</p>
+
+<h3>写出 entity-index.md：你的导航地图</h3>
+
+<p>扫描完所有来源后，把各个 <code>_entities.md</code> 合并成一张总表——<code>entity-index.md</code>。这是 Mosaic 项目最重要的一个文件，它是你的导航地图。</p>
+
+<p>对 AI 说：</p>
+
+<pre><code>以下是多本书的实体扫描结果。请合并成一张总索引表。
+
+格式：Markdown 表格
+
+| 实体名 | 类型 | 苏轼评传 | 苏东坡传 | 苏轼十讲 | 苏轼年谱(孔) | 苏轼年谱(王) | ... |
+|--------|------|----------|----------|----------|-------------|-------------|-----|
+| 沈括 | 人物 | Ch3,7,9 | Ch12,14 | Ch5 | 元丰二年条 | 未专门述及 | ... |
+| 乌台诗案 | 事件 | Ch7,8 | Ch12-14 | Ch5,6 | 元丰二年全条 | 元丰二年条 | ... |
+| ... | ... | ... | ... | ... | ... | ... | ... |
+
+要求：
+- 每个来源标注该实体被提到的具体章节
+- 如果某个来源完全没有提到该实体，写"未专门述及"，不要留空
+- 实体按拼音排序
+- 类型分为：人物、事件、概念、地点
+</code></pre>
+
+<p>这个矩阵的价值在于：以后你想研究任何一个人物或事件，看一眼表格就知道该去拿本书的哪一章找。不需要通读，不需要回忆，不需要在七本书里翻来翻去。</p>
+
+<div class="tip"><strong>实操经验：</strong>entity-index.md 越详细越好。章节后面可以加一个括号标注页码或段落位置，方便以后快速定位。如果某本书的实体扫描结果不够精细（比如只标了"第七章"而不是"第七章第三段"），趁早重扫——后面写 Mosaic 页面时你会感谢自己现在的较真。</div>
+
+<h3>苏东坡项目的真实数据</h3>
+
+<p>具体感受一下规模：</p>
+
+<table>
+  <tr><th>项目</th><th>数字</th></tr>
+  <tr><td>来源总数</td><td>7 本（4 传记 + 3 年谱）</td></tr>
+  <tr><td>总字数</td><td>约 400 万字</td></tr>
+  <tr><td>入库耗时</td><td>约 1 小时（转换 + 扫描）</td></tr>
+  <tr><td>提取实体</td><td>约 800+ 人物、300+ 事件、200+ 概念</td></tr>
+  <tr><td>entity-index.md 大小</td><td>约 50KB</td></tr>
+</table>
+
+<p>400 万字是什么概念？《战争与和平》大概 50 万字。你一辈子可能不会「精读」8 本《战争与和平》的量——但你完全可以「知道里面有什么」。这就是 Mosaic 给你的超能力：在一小时之内，让你对 400 万字的内容建立一个可导航的认知地图。</p>
+
+<div class="callout"><strong>亲爱的马拉亚：</strong>很多人在这一步就放弃了，因为「看起来工作量很大」。实际上，一旦你走通过一次，你就知道一个下午可以从零到完整索引。拖延的不是工作量，是对未知工作流的恐惧。照着上面写的做，一个小时，你就能从「拿到七本书」走到「拥有一个完整的 entity-index.md」。这是整个 Mosaic 方法唯一一次需要「批量处理」的环节，后面的每一步都是在享受这个索引带来的红利。</div>
+
+</div>
+
+<!-- ────────────────────────────────────────────── -->
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part11"><span class="num">§11</span> 第二步：编译 Mosaic 页面</h2>
+<p class="section-en">Step 2: Compiling Mosaic Pages</p>
+<p class="section-intro">有了 entity-index.md，你就再也不用「读」一本书了。你只读一个实体在每本书里被讨论的那几百个字，然后并排放在一起，差异就自己跳出来了。</p>
+
+<h3>编译一个 Mosaic 页面的完整流程</h3>
+
+<p>假设你要写苏东坡项目里的第一个 Mosaic 页面，主题是<strong>沈括</strong>。你在研究之前对沈括的了解大概是「写《梦溪笔谈》那个科学家，好像跟苏东坡有点过节」。现在你要搞清楚：这个人在苏东坡的人生里到底是个什么角色？不同传记作者怎么看他？</p>
+
+<p>如果是传统研究方式，你得把七本书里提到沈括的地方一页一页翻出来。这个过程通常就是放弃的开始。</p>
+
+<p>有了 entity-index.md，事情变成这样：</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h4>查矩阵</h4>
+    <p>打开 entity-index.md，搜索"沈括"，一行就看到：沈括在苏轼评传的第 3、7、9 章被讨论，在苏东坡传的第 12、14 章，在苏轼十讲的第 5 章，在孔凡礼年谱的元丰二年条……王水照年谱则是「未专门述及」。10 秒钟，你就知道该去哪几本书、哪几章找。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h4>只读相关章节</h4>
+    <p>你不是去读整本书。一本 10 万字的传记，谈沈括的加起来不超过 2000 字。打开苏轼评传第三章，直接跳到沈括相关的段落；再打开第七章和第九章，同样只读沈括的部分。十分钟，你就能读完七本书里所有提到沈括的内容。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h4>按来源摘录</h4>
+    <p>每个来源摘出关键段落，标注作者的核心判断。用📖 emoji 和括号标注出处，方便以后回溯。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h4>写差异表</h4>
+    <p>把所有来源并排放在一起，标出它们在哪些关键点上说法一致、哪些点上判断相反。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">5</div>
+  <div class="step-content">
+    <h4>诚实标注空源</h4>
+    <p>如果有来源完全没提到这个实体，不假装它说了什么——直接写「未专门述及」。空白本身就是信息。</p>
+  </div>
+</div>
+
+<h3>完整示例：沈括的 Mosaic 页面</h3>
+
+<p>下面是一个完整的 Mosaic 页面，展示从查矩阵到写出差异表的全过程。</p>
+
+<h4>📋 沈括</h4>
+
+<p><strong>类型：</strong>人物 | <strong>生卒：</strong>1031-1095 | <strong>活跃时期：</strong>北宋中期</p>
+
+<h4>各来源论述</h4>
+
+<p><strong>📖 《苏轼评传》（王水照、朱刚）— 第 3、7、9 章</strong></p>
+
+<blockquote>沈括在熙宁变法期间作为新法干将，与苏轼政见相左。元丰二年乌台诗案前，沈括曾以"访察两浙"为名，搜集苏轼诗文中对时政的讽刺，上报朝廷。苏轼评传认为沈括此举虽有政治投机之嫌，但并非乌台诗案的主谋——真正推动此案的是御史李定、舒亶等人。沈括在哲宗朝后政治上被边缘化，晚年隐居润州著《梦溪笔谈》，完成了从政客到科学家的转身。</blockquote>
+
+<p><strong>核心判断：</strong>博学但有政治污点。作者对沈括的整体评价偏中性，强调其科学贡献最终超越了政治投机。</p>
+
+<p><strong>📖 《苏东坡传》（李一冰）— 第 12、14 章</strong></p>
+
+<blockquote>李一冰对沈括的描述更为负面。他认为沈括两次在关键时刻对苏轼落井下石：第一次是熙宁年间以"访察"为名搜集苏轼诗稿，第二次是元丰年间在李定的乌台诗案调查中提供材料。李一冰引苏轼晚年书信为证，认为苏轼对沈括始终心存戒备。</blockquote>
+
+<p><strong>核心判断：</strong>投机分子，多次陷害苏轼。李一冰以苏轼个人感受为判断依据，视角偏主观。</p>
+
+<p><strong>📖 《苏轼十讲》（朱刚）— 第 5 讲</strong></p>
+
+<blockquote>朱刚在此书中将沈括放在"新旧党争中的人物群像"框架下讨论。他认为沈括的问题不在个人品德，而在北宋士大夫普遍面临的困境：在党争极化的环境中，技术官僚被迫选择阵营。沈括选择了新党，并非因为认同王安石的理念，而是因为他的科学才能在新党体制内更容易获得施展空间。</blockquote>
+
+<p><strong>核心判断：</strong>体制困境下的选择，非纯粹的个人品质问题。与《苏轼评传》中同一位作者的判断形成有趣的补充和深化。</p>
+
+<p><strong>📖 《苏轼年谱》（孔凡礼）— 元丰二年条</strong></p>
+
+<blockquote>年谱仅记录事实：元丰二年，沈括以"两浙访察使"身份巡视杭州。在杭期间，曾与苏轼会面，"索近作"，苏轼"尽与之"。后沈括将这些诗作带回京城，"签贴以进"，指认其中讥讽朝政之处。</blockquote>
+
+<p><strong>核心判断：</strong>无主观判断。年谱体例决定其只陈述可考事实。</p>
+
+<p><strong>📖 《苏轼年谱》（王水照）</strong></p>
+
+<p>未专门述及沈括。王水照年谱以文学创作为主线，对非文学人物的着墨较少。</p>
+
+<p><strong>📖 《漫话东坡》（莫砺锋）</strong></p>
+
+<p>仅在一处脚注中提及沈括，称其为"有才无行之辈"，未展开论述。</p>
+
+<h4>差异表</h4>
+
+<table>
+  <tr>
+    <th>争议点</th>
+    <th>苏轼评传</th>
+    <th>苏东坡传</th>
+    <th>苏轼十讲</th>
+    <th>孔凡礼年谱</th>
+    <th>差异性质</th>
+  </tr>
+  <tr>
+    <td>沈括与乌台诗案的关系</td>
+    <td>提供了诗稿，但非主谋</td>
+    <td>两次陷害，是主谋之一</td>
+    <td>体制下的选择，非个人行为</td>
+    <td>仅记录"索近作"的事实</td>
+    <td><strong>判断分歧</strong>：从"非主谋"到"主谋之一"到"体制问题"</td>
+  </tr>
+  <tr>
+    <td>对沈括的整体评价</td>
+    <td>博学的争议人物</td>
+    <td>投机分子</td>
+    <td>体制困境的缩影</td>
+    <td>不评价</td>
+    <td><strong>立场差异</strong>：个人道德 vs. 结构分析</td>
+  </tr>
+  <tr>
+    <td>与苏轼的关系性质</td>
+    <td>政敌</td>
+    <td>迫害者</td>
+    <td>党争中的对立方</td>
+    <td>事实联系</td>
+    <td><strong>定性差异</strong>：从"政敌"到"迫害者"</td>
+  </tr>
+</table>
+
+<h4>空源说明</h4>
+
+<p>王水照年谱：未专门述及 | 莫砺锋《漫话东坡》：仅脚注提及</p>
+
+<p>——</p>
+
+<p>这一页看完，你对沈括和苏东坡的关系就有了一个比读任何一本书都更立体、更诚实的理解。你知道李一冰对他很负面，你也知道朱刚觉得这不只是个人品质问题。你知道孔凡礼怎么记录事实，也知道王水照为什么没提他。<strong>你不需要「相信」任何一个版本——你手里有四五个版本，你可以自己判断。</strong></p>
+
+<h3>编译 Mosaic 页面的指令模板</h3>
+
+<p>给 AI 的标准指令：</p>
+
+<pre><code>我现在要编译一个 Mosaic 页面，主题是 [实体名]，类型是 [人物/事件/概念]。
+
+下面是 materials/ 目录中的资料来源，以及 entity-index.md 中该实体的矩阵信息。
+请按以下结构输出：
+
+## [实体名]
+- 类型、年代、一句话简介
+
+## 各来源论述
+对每个来源：
+📖 [来源名]（[作者]）— [章节]
+[摘录关键段落]
+**核心判断**: [一句话总结该书作者的判断]
+（如果该来源未专门述及，写"未专门述及"）
+
+## 差异表
+| 争议点 | 来源A | 来源B | 来源C | ... | 差异性质 |
+|--------|-------|-------|-------|-----|----------|
+| ... | ... | ... | ... | ... | ... |
+
+## 空源说明
+[列出未涉及该实体的来源及原因]
+
+写作要求：
+- 每个来源的摘录不超过3段，精选最有信息量的
+- 核心判断用一句话，立场要鲜明
+- 差异表至少列出3个争议点
+- 不要输出没有来源依据的"总结"——Mosaic 不做综合判断，只做并排展示
+</code></pre>
+
+<div class="warning"><strong>最容易犯的错误：</strong>在「各来源论述」部分就开始综合总结——"综合来看，沈括是一个……"——这恰恰是 Mosaic 要避免的。综合判断应该留给读者自己形成。你的工作是并排展示，不是代替读者思考。如果你发现自己在写"综合来看""总的来说""其实"这样的词，删掉重写。</div>
+
+<h3>处理「来源太多」时的编译策略</h3>
+
+<p>有时候一个实体在十几个来源中都被提到，一个个写会非常冗长。这时候用什么策略？</p>
+
+<p><strong>优先级排序：</strong></p>
+
+<p>（1）<strong>学术型来源优先。</strong>论文、专著 > 大众读物。朱刚的《苏轼评传》对沈括的判断比莫砺锋的随笔更值得放前面。</p>
+
+<p>（2）<strong>有明确判断的来源优先。</strong>如果一个来源只是顺手提了一嘴（比如「沈括也是当时有名的科学家」），信息量为零，可以跳过。</p>
+
+<p>（3）<strong>与主流判断相反的来源优先。</strong>如果六个来源说沈括是投机分子，一个来源说他是体制受害者——那第七个来源一定要写。差异比共识更重要。</p>
+
+<div class="tip"><strong>经验法则：</strong>一个 Mosaic 页面参考 3-5 个来源是理想的。10 个以上来源会让页面变成流水账。如果确实有 10+ 个来源都提到了，选最有代表性、视角最不同的 5 个详细写，其余在「空源/略源说明」里用一行带过：「另有 XX 书简略提及，判断与 XX 来源类似。」</div>
+
+</div>
+
+<!-- ────────────────────────────────────────────── -->
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part12"><span class="num">§12</span> 第三步：查询、维护与持续更新</h2>
+<p class="section-en">Step 3: Querying, Maintenance &amp; Continuous Update</p>
+<p class="section-intro">Mosaic 建好之后不需要「阅读」——你需要的是「提问」。每次一个问题，LLM 帮你分源检索、并排报告。新增资料时，跑一遍更新工作流就行。它不是一次建成的东西，是活的。</p>
+
+<h3>Query 模式：把研究变成对话</h3>
+
+<p>传统的笔记系统是供你翻阅的，Mosaic 是供你<strong>提问</strong>的。这是最根本的使用方式差异。</p>
+
+<p>假设你已经建好了苏东坡 Mosaic——entity-index.md 在手，七本书的全文都在资料库里。现在你对 AI 说：</p>
+
+<pre><code>沈括在乌台诗案中扮演了什么角色？请分源回答，标注每个来源的出处章节。
+</code></pre>
+
+<p>AI 会怎么回答？它不再给你一个来源不明、综合判断模糊的「答案」，而是：</p>
+
+<blockquote>
+<p><strong>📖 《苏轼评传》（王水照、朱刚）— 第 7 章</strong><br>
+沈括在乌台诗案中提供了苏轼诗稿，但并非主谋。该书认为真正推动案件的是御史李定和舒亶。沈括的角色更接近"情报提供者"而非"案件策划者"。（第 7 章第 3 节）</p>
+
+<p><strong>📖 《苏东坡传》（李一冰）— 第 14 章</strong><br>
+李一冰持不同看法，认为沈括在元丰二年之前就以访察之名收集苏轼诗作，是乌台诗案的"预谋者"之一。李一冰引苏轼晚年书信，暗示苏轼本人也如此认为。（第 14 章第 5 节）</p>
+
+<p><strong>📖 《苏轼十讲》（朱刚）— 第 5 讲</strong><br>
+同一作者在此书中做了更结构化的分析：沈括的行为必须放在新旧党争的体制环境下理解。他不是在陷害苏轼个人，而是在执行新党体制对异议者的系统化打压。（第 5 讲第 4 节）</p>
+
+<p><strong>📖 《苏轼年谱》（孔凡礼）— 元丰二年条</strong><br>
+年谱仅记录"沈括索近作""签贴以进"的事实序列。两条记录之间相隔数月，未明确断言因果关系。</p>
+
+<p><strong>⚡ 差异识别：</strong>三个传记来源对沈括的角色判断从"情报提供者"到"预谋者"不等，差异根源于作者对沈括动机的不同推断——以及他们对苏轼晚年书信的不同解读。年谱提供的事实基础不能解决这一分歧。</p>
+</blockquote>
+
+<p>注意看这个回答和普通 AI 回答的区别：</p>
+
+<div class="compare">
+  <div class="compare-good"><strong>Mosaic 查询：</strong>每个判断都带出处。你知道哪个作者说了什么、在哪一章说的。你可以验证，可以选择信任某个来源。</div>
+  <div class="compare-bad"><strong>普通查询：</strong>"沈括在乌台诗案中扮演了重要角色，他收集了苏轼的诗作并上报朝廷……"你不知道这个判断来自哪里，也许是某本书，也许是训练数据里某个不可考的语料。</div>
+</div>
+
+<p><strong>探究不只在查询前——查询中的追问同样是关键动作。</strong>读完上面的差异后你自然想追问："李一冰说苏轼本人在书信中也如此认为，具体是哪封信？内容是什么？其他学者怎么看这封信的真实性？"然后 AI 再次分源回答。这就是 Mosaic 的研究节奏：不是按顺序读，是追着问题跑。</p>
+
+<h3>新增来源后的更新工作流</h3>
+
+<p>Mosaic 不是一次建成就丢在那里的。当你发现了一本新的好书，或者一篇新的重要论文，你要把它加进去。但怎么加才不影响已有的工作？</p>
+
+<div class="flow">
+  <div class="flow-item">放入资料库</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">EPUB/PDF → MD</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">实体扫描</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">更新 entity-index.md</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">选择性回刷已有页面</div>
+</div>
+
+<p>前面四步跟初始化一模一样，不赘述。关键在第五步——<strong>选择性回刷</strong>。</p>
+
+<p>你不需要因为加了一本新书就重写所有已有的 Mosaic 页面。你只需要考虑一件事：<strong>这本来新的来源，对哪些已有的 Mosaic 页面会有实质性的新信息？</strong></p>
+
+<p>比如你新加了一本《北宋党争与文人命运》（假设的书名），你快速浏览它在 entity-index.md 里的那行，发现它提到的核心人物是王安石、司马光、苏轼，而没有单独讨论沈括——那沈括的页面就不需要回刷。</p>
+
+<p>但如果它有一章专门讨论沈括在党争中的角色定位，而且给出了一个新的判断框架（比如沈括其实是一个"双面间谍"式的角色）——那你应该把这一章的信息加进沈括的 Mosaic 页面。</p>
+
+<p>对 AI 说：</p>
+
+<pre><code>我在苏东坡 Mosaic 中新增了一个来源《北宋党争与文人命运》，它的实体扫描结果如下：
+[粘贴该书的实体扫描片段]
+
+请检查以下已有 Mosaic 页面，判断是否需要回刷：
+- 沈括
+- 乌台诗案
+- 王安石
+- 苏轼（核心传记页）
+
+对于每个页面，判断标准：
+- 新来源是否提供了已有来源中没有的新信息？
+- 新来源是否对某个关键争议点给出了不同的判断？
+- 如果是，请提取相关内容，按现有 Mosaic 页面格式补入。
+- 如果否，跳过。
+</code></pre>
+
+<div class="tip"><strong>效率法则：</strong>一次新增来源，最多回刷 3-5 个已有页面。不要想着"把新书的信息全部消化进每一个页面"——那是建新 Mosaic，不是维护旧 Mosaic。你只需要把新来源中最独特的部分注入最相关的几个页面。</div>
+
+<h3>log.md：只追加，不修改</h3>
+
+<p>在资料库根目录下放一个 <code>log.md</code>，记录每一次对资料库的操作。不是日记，是操作日志——只记录做了什么，不记录感想。</p>
+
+<pre><code># Mosaic 操作日志
+
+## 2025-07-01
+- [ingest] 加入《苏轼评传》（王水照、朱刚），EPUB→MD，已扫描实体
+- [ingest] 加入《苏东坡传》（李一冰），EPUB→MD，已扫描实体
+- [compile] 创建 entity-index.md v1，包含上述两本书的实体
+
+## 2025-07-02
+- [ingest] 加入《苏轼十讲》（朱刚），PDF→MD，已扫描实体
+- [update] 更新 entity-index.md → v2，新增朱刚十讲的实体矩阵
+- [compile] 创建沈括 Mosaic 页面
+
+## 2025-07-05
+- [ingest] 加入孔凡礼《苏轼年谱》三册，PDF→MD，已扫描实体
+- [update] 更新 entity-index.md → v3
+- [backfill] 回刷沈括 Mosaic 页面，补入孔凡礼年谱的事实记录
+- [lint] 检查沈括页面：孔凡礼年谱标注为"元丰二年条"，精确度不足，待细化
+</code></pre>
+
+<p>为什么必须只追加？因为这是你的研究轨迹。三个月后你回头翻 log.md，能看到你的 Mosaic 是怎么一步步长出来的。如果你在中间修改了前面的条目，这条轨迹就断了。</p>
+
+<div class="callout"><strong>要点：</strong>log.md 的另一个作用是防止「重复工作」。你有时候会忘了自己已经扫描过某本书，又给它跑了一次实体扫描。翻一下日志就能避免。</div>
+
+<h3>研究节奏：追问题，不追章节</h3>
+
+<p>大多数人的阅读习惯是线性的：翻开一本书，从第一页读到最后一页。但 Mosaic 改变了这个习惯——你的思考方式也会改变。</p>
+
+<p>有了 Mosaic 之后，你不再问自己「我该读哪本书的哪一章？」，而是问自己：<strong>「我现在对什么最困惑？」</strong>那个困惑就是你的下一个入口。</p>
+
+<p>困惑→提问→分源查询→发现差异→追问更具体的问题→再查→……一个月后你发现你已经追着问题把七本书的关键部分都读过了。<strong>你不是在「读书」，你是在「解谜」。</strong>这种感觉完全不一样。</p>
+
+<p>而且你会发现，随着 Mosaic 页面的积累，页面之间会自然地互相连接：沈括的页面引用了乌台诗案，乌台诗案的页面引用了王安石变法，王安石变法的页面引用了宋神宗……你不需要手动建目录，它们自己就织成了一张网。</p>
+
+<pre><code># 在 Mosaic 页面中使用 Wikilink 互相连接
+沈括在 [[乌台诗案]] 中扮演的角色，与 [[王安石]] 变法的
+政治格局密切相关——详见 [[新旧党争]] 页面的差异表。
+</code></pre>
+
+<p>这种 wikilink 不是装饰，是研究路径。每次你点进一个新页面，困惑驱动你提出新问题，新问题又需要查更多来源——这个循环不会停，直到你在这个领域里不再有困惑。</p>
+
+<h3>核心隐喻：拼马赛克画，不是建图书馆</h3>
+
+<p>最后，我想把这个方法的底层隐喻讲清楚。因为如果你理解了这个隐喻，你就能理解前面所有的设计决策。</p>
+
+<p><strong>图书馆 vs. 马赛克画。</strong></p>
+
+<p>图书馆的逻辑是：把资料归类、编目、上架。每本书放在它该在的位置上。你走进图书馆，想要了解沈括，你找到 K82 号书架（历史人物类），抽出五本书，坐下来一本本读。最终你脑子里形成一个关于沈括的印象——但这个印象是基于你读的顺序、你对哪本书更有感情、你记得住哪些细节。<strong>没有人能帮你验证你的印象是对的。</strong></p>
+
+<p>马赛克画的逻辑是：把每一片拼图（每个来源的判断）并排放在一起。你不会因为多读了两本书就改变对沈括的看法——因为你<strong>同时看得到</strong>所有来源的说法。你看见李一冰说他是投机分子，你也看见朱刚说这是体制问题。这两片拼图并排放在那里，你不需要选择相信谁——你<strong>看得清楚差异本身</strong>，这比任何单一结论都有价值。</p>
+
+<p>图书馆给你的是知识，马赛克画给你的是一种能力——<strong>同时持有多个冲突叙述而不急于裁决的能力</strong>。在任何一个复杂领域里，这种能力比任何一本书的结论都重要。</p>
+
+<div class="callout"><strong>亲爱的马拉亚：</strong>我写这本书的初衷，不是教你一个工具或者一套指令，是真的想让你拥有这种能力。当你面对一个完全陌生的领域——一个新行业、一个新工具、一个新赛道——那种「不知道自己不知道什么」的发慌。LLM Mosaic 就是用来对付这种慌张的：先拆成一片片独立视角的拼图，再并排放在一起，让差异替你照亮前路。你不需要成为专家才能开始——你只需要收集、扫描、并排。剩下的，提问会带你走下去。</div>
+
+</div>
+
+<!-- ===== part05-cases.html ===== -->
+<div class="content">
+
+<h2 class="section-title page-break" id="part13"><span class="num">§13</span> 案例一：苏东坡研究 — 当四本传记讲了四个不同的人</h2>
+<p class="section-en">Case 1: Su Dongpo Research — When Four Biographies Tell Four Different Stories</p>
+<p class="section-intro">400万字原始材料、56个人物实体、7份来源的交叉矩阵——用Mosaic而不是"综合"，你才能看到传记作者之间的沉默、矛盾与共识。</p>
+
+<h3>一个真实的研究困境</h3>
+
+<p>2026年，一位独立研究者决定系统性地研究苏东坡。他手里有七份材料：李一冰《苏东坡新传》、林语堂《苏东坡传》、周文翰《孤星之旅：苏东坡传》、祝勇《在故宫寻找苏东坡》，再加上孔凡礼撰写的三册《苏轼年谱》。</p>
+
+<p>七本书加起来超过400万字。他花了三个月读完，然后坐下来想写一篇综述——发现自己写不出来。</p>
+
+<p>不是因为信息太少，恰好相反：信息太多，而且<strong>互相矛盾</strong>。李一冰笔下的苏东坡是一个命运多舛的政治受难者，林语堂笔下的苏东坡是一个乐天知命的逍遥天才，周文翰笔下的苏东坡更像一个在困境中不断自我调适的普通人。更麻烦的是，同一个历史事件——比如乌台诗案——四本传记的叙述重点完全不同，有些细节甚至无法调和。</p>
+
+<div class="callout"><strong>要点：</strong>在历史研究里，多源信息的价值不在"取平均值"，而在"看差异"。Mosaic的设计哲学正是在这个洞察上长出来的——不综合，不消解矛盾，让读者自己看见。</div>
+
+<h3>项目全景：56实体 × 7来源矩阵</h3>
+
+<p>研究者在Mosaic中构建了一个跨源矩阵：</p>
+
+<table>
+  <thead>
+    <tr><th>维度</th><th>配置</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>原始来源</td><td>4本传记 + 3册年谱 = 7份独立来源</td></tr>
+    <tr><td>实体总数</td><td>56个（核心人物28个，政治事件9个，文学作品12个，地名/官署7个）</td></tr>
+    <tr><td>总字数</td><td>约400万字（传记约280万字，年谱约120万字）</td></tr>
+    <tr><td>年谱块引用</td><td>579个 <code>^block-id</code>，每条可一跳定位到原文具体行</td></tr>
+    <tr><td>跨源差异标注</td><td>43处"高冲突"标注（不同传记对同一事实描述矛盾），87处"选择性叙述"标注（某份来源完全跳过）</td></tr>
+    <tr><td>产出</td><td>一篇20000字研究综述（带完整溯源标注），一份宋代政治人物关系图</td></tr>
+  </tbody>
+</table>
+
+<h3>看三个实体的Mosaic页面</h3>
+
+<p>下面是项目中最能体现Mosaic价值的三个实体页面——每一个都能让你理解为什么"并列"比"综合"更好。</p>
+
+<h4>实体一：沈括 — 最有名的"缺席者"</h4>
+
+<p>如果你读过《梦溪笔谈》，你一定知道沈括——北宋最博学的科学家。但他和苏东坡的关系，可能你也听过一个流传很广的说法：沈括是乌台诗案的"告密者"。</p>
+
+<p>这个指控是真的吗？让我们看看七份来源怎么说：</p>
+
+<table>
+  <thead>
+    <tr><th>来源</th><th>对"沈括告密"的描述</th><th>性质</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>李一冰《苏东坡新传》</td><td>详细叙述沈括在杭州与苏轼交往，带回苏轼诗作呈给神宗，认为是乌台诗案的重要导火索。用了整整两页篇幅。</td><td>确认指控，详细叙述</td></tr>
+    <tr><td>林语堂《苏东坡传》</td><td><strong>完全未提及沈括。</strong>全书三百余页，沈括这个名字一次都没出现。</td><td>🚩 空源标注</td></tr>
+    <tr><td>周文翰《孤星之旅》</td><td>提及沈括与苏轼的交往，但认为沈括带回诗作是例行公务而非蓄意陷害，"告密"说是后世附会。用了一页半做辨析。</td><td>质疑指控，审慎辨析</td></tr>
+    <tr><td>祝勇《在故宫寻找苏东坡》</td><td>简略提及（约200字），基本沿用"告密"说，但没有提供新证据。</td><td>沿用旧说，未深究</td></tr>
+    <tr><td>孔凡礼《苏轼年谱》</td><td>三条年谱条目涉及沈括：熙宁六年杭州之会、元丰二年乌台诗案、元祐年间再度相遇。只列事实，不判断动机。每条配有 <code>^block-id</code>。</td><td>纯事实，不判断</td></tr>
+    <tr><td>孔凡礼《苏轼年谱》第二册</td><td>一条年谱条目涉及沈括在元丰年间与苏轼的通信。</td><td>纯事实</td></tr>
+    <tr><td>孔凡礼《苏轼年谱》第三册</td><td>无沈括相关条目。</td><td>🚩 空源标注</td></tr>
+  </tbody>
+</table>
+
+<div class="callout"><strong>要点：</strong>林语堂不写沈括，这件事本身就是一条信息。在传统的"综合"模式下，你不会知道林语堂选择跳过了什么。但在Mosaic中，"空源标注"让你看到每一位作者的<strong>选择性沉默</strong>——有时候沉默比言说更有信息量。</div>
+
+<p>在Mosaic的沈括实体页面中，研究者的注释是：</p>
+
+<div class="tip"><strong>研究者批注：</strong>林语堂《苏东坡传》全书未提沈括。考虑到林语堂作传时对苏东坡人物的偏爱倾向，这一省略可能不是偶然。建议读者自行判断：林语堂是否刻意回避了一个可能影响到苏东坡"乐天派"形象的复杂人物？这个问题没有标准答案，但Mosaic让你有机会提出它。</div>
+
+<h4>实体二：王安石 — 四本传记画了四个不同的人</h4>
+
+<p>如果你只看一本传记，你对王安石的印象就取决于你选的那一本。在Mosaic中，四本传记对王安石的刻画同时呈现在你面前：</p>
+
+<table>
+  <thead>
+    <tr><th>来源</th><th>王安石的形象</th><th>对变法的评价</th><th>对苏王关系的判断</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>李一冰</td><td>理想主义的激进改革者，性格执拗，"拗相公"的形象被充分展现</td><td>肯定变法动机，但认为执行中有重大失误</td><td>政见对立但不涉个人恩怨，晚年有和解迹象</td></tr>
+    <tr><td>林语堂</td><td>刚愎自用、不通人情的"国家主义者"</td><td>基本否定，认为变法导致了北宋的衰落</td><td>苏东坡是变法的受害者，王是施害者的一方</td></tr>
+    <tr><td>周文翰</td><td>复杂的悲剧人物，理想与现实的冲突体</td><td>变法出发点合理但方式粗暴，脱离了基层实际</td><td>两人都是时代的牺牲品，私人关系被政治裹挟</td></tr>
+    <tr><td>祝勇</td><td>偏重描写其文化成就和晚年生活</td><td>较少涉及变法评价，更多关注文人身份</td><td>强调两人晚年的和解和互相欣赏</td></tr>
+  </tbody>
+</table>
+
+<p>如果你让LLM做一个"综合"——"请综合四本传记，告诉我王安石是个什么样的人"——它会给你一个四平八稳的表述，看起来全面，实际上<strong>抹掉了上述表格里最有价值的四列矛盾</strong>。</p>
+
+<p>而在Mosaic中，这张表格就是答案。研究者不需要替读者做判断，读者自己看到四本传记的差异，自己形成判断。</p>
+
+<div class="compare">
+  <div class="compare-good"><strong>推荐：Mosaic方式</strong><br>四本传记对王安石的刻画并列呈现。读者看到李一冰的"理想主义改革者"和林语堂的"刚愎自用者"之间的矛盾，也看到周文翰和祝勇的不同侧重点。判断权交给读者。</div>
+  <div class="compare-bad"><strong>不推荐：传统综合</strong><br>"王安石是一个复杂的政治人物，既有改革的理想，也有性格的局限……"——这段话表面上正确，但你无法知道哪些传记支持哪个判断，更无法知道它们之间的分歧有多深。</div>
+</div>
+
+<h4>实体三：乌台诗案 — 同一事件，四种叙事</h4>
+
+<p>乌台诗案是苏东坡人生中的转折点，也是中国文学史上最著名的文字狱之一。但四本传记对这件事的叙述差异之大，超过了上述任何一个人物实体：</p>
+
+<table>
+  <thead>
+    <tr><th>维度</th><th>李一冰</th><th>林语堂</th><th>周文翰</th><th>祝勇</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>篇幅</strong></td><td>约50页（全书最长章节之一）</td><td>约30页</td><td>约25页</td><td>约15页</td></tr>
+    <tr><td><strong>叙事焦点</strong></td><td>政治斗争的残酷细节，狱中的恐惧与绝望</td><td>苏东坡面对灾难时的幽默与豁达</td><td>事件前后的社会网络变化和体制性原因</td><td>事件的文化意义和后世评价</td></tr>
+    <tr><td><strong>关键人物</strong></td><td>李定、舒亶、沈括、张璪</td><td>神宗的犹豫、太后的求情</td><td>台谏制度、新旧党争的体制逻辑</td><td>苏辙、王诜等营救者</td></tr>
+    <tr><td><strong>苏东坡的表现</strong></td><td>恐惧、绝望、写绝命诗</td><td>坦然、幽默、狱中酣睡</td><td>从恐惧到逐渐适应，一种心理调适过程</td><td>文人的风骨与后世传颂的形象</td></tr>
+    <tr><td><strong>空源标注</strong></td><td>—</td><td>未提及沈括告密<br>未提及狱中具体拷问细节</td><td>未提及太后求情的细节</td><td>未提及案件的法律程序细节</td></tr>
+  </tbody>
+</table>
+
+<p>看这张表，读者会自然地问出一系列问题：苏东坡在狱中到底是绝望还是豁达？两个极端叙事怎么可能同时成立？是不同阶段的不同表现，还是传记作者的文学加工？沈括到底告密了没有？</p>
+
+<p>Mosaic <strong>不替你回答这些问题</strong>。它给你的是提出问题所需的全景视野。</p>
+
+<h3>年谱的块级引用：579个定位锚点</h3>
+
+<p>年谱是按日期编排的事实汇编，天然适合做块级引用。孔凡礼《苏轼年谱》三册共约120万字，Mosaic在其中标记了579个<code>^block-id</code>。怎么用？</p>
+
+<p>举个例子：在"王安石"实体页面中，有一处提到"熙宁四年（1071年），苏轼上书反对新法，王安石因此罢免了苏轼的职务"。研究者在Mosaic中不仅标注了李一冰和林语堂对这个事件的叙述差异，还在旁边附上年谱的块引用：</p>
+
+<pre><code>▸ 熙宁四年六月，轼除杭州通判。初，王安石欲变科举、兴学校……
+[孔凡礼《苏轼年谱·卷七》p.234 ^block-37a2f]</code></pre>
+
+<p>读者点一下<code>^block-37a2f</code>，右侧面板（双栏模式）立即跳到年谱原文的具体段落。不需要翻书，不需要检索，一条引用就是一个GPS坐标。</p>
+
+<div class="tip"><strong>为什么块级引用对研究型阅读至关重要：</strong>传统脚注只说"见某书某页"，你还要自己去翻。而块级引用让你在Mosaic内部一键跳转。读历史传记时，在"传主的叙述"和"年谱的事实"之间来回切换，是形成独立判断的核心动作。Mosaic把这个动作从十几秒缩短到了瞬间。</div>
+
+<h3>双栏浏览：左边是观点，右边是事实</h3>
+
+<p>在实际使用中，研究者习惯用双栏模式浏览：</p>
+
+<ul>
+  <li><strong>左栏：</strong>某本传记对"乌台诗案"的叙述（二手叙述，有作者立场）</li>
+  <li><strong>右栏：</strong>年谱中同一时段的逐日记录（一手事实，无判断）</li>
+</ul>
+
+<p>比如左栏显示林语堂写"苏轼在狱中酣睡如常，毫无惧色"，右栏年谱显示同一日有多条与案件相关的审讯记录和友人的书信往来。读者自己判断："酣睡如常"是事实还是文学化处理？</p>
+
+<p>这就是Mosaic的核心理念——<strong>你不必相信任何一位作者</strong>，因为你有能力同时看到所有作者，还能一键跳转到一手原始材料。</p>
+
+<h3>从这个案例中抽出来的方法论</h3>
+
+<p>苏东坡研究这个案例展示了Mosaic在历史传记场景中的几个关键价值：</p>
+
+<ol>
+  <li><strong>空源标注是隐形的信息。</strong>一个传记作者选择了不写什么，和选择了写什么同等重要。Mosaic让缺席成为可见的数据点。</li>
+  <li><strong>差异表比综合结论更有价值。</strong>四本传记对王安石的矛盾描述放在一起，比任何"全面客观"的综合都有信息量。</li>
+  <li><strong>块级引用打通了二手叙述和一手事实。</strong>年谱的<code>^block-id</code>让读者不再困在传记作者的叙事里，随时可以跳出到原始材料。</li>
+  <li><strong>双栏浏览让判断成为可能。</strong>观点和事实并排，读者不再是信息的被动接受者，而是判断的主动参与者。</li>
+</ol>
+
+</div>
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part14"><span class="num">§14</span> 案例二：法律判例分析 — 当"综合"等于"不经审判就判决"</h2>
+<p class="section-en">Case 2: Legal Case Analysis — When "Synthesis" Equals "Verdict Without Trial"</p>
+<p class="section-intro">控方、辩方、法官各有一套叙述。让LLM"综合"这三份文书，等于在当事人的事实争议还没审清楚之前，就不动声色地选了一个立场。</p>
+
+<h3>一个危险的场景</h3>
+
+<p>假设你是一个法律研究助理，在分析一起合同纠纷案。案卷里有三份核心文书：</p>
+
+<ul>
+  <li><strong>起诉状（控方代理）：</strong>12页。主张被告恶意违约，索赔500万元。</li>
+  <li><strong>答辩状（辩方代理）：</strong>15页。否认违约，主张合同条款存在重大误解，同时提出反诉。</li>
+  <li><strong>一审判决书（法官）：</strong>28页。认定部分违约成立，判赔120万元，驳回反诉。</li>
+</ul>
+
+<p>你打开ChatGPT，把三份文书都贴进去，说："帮我总结一下这个案子。"</p>
+
+<p>它返回了一段看起来非常专业的总结。但问题在哪儿？</p>
+
+<div class="warning"><strong>致命缺陷：</strong>当你让LLM"综合"这三份文书，你实际上给了它一个不可能完成的任务——它必须在不具备事实认定能力的前提下，对三份彼此矛盾的叙述做出"协调"。而"协调"本身，就是一种隐含的判断。</div>
+
+<p>比如起诉状说"被告在2023年3月已经知道货物无法按时交付"，答辩状说"原告提供的技术参数在2023年4月才最终确认"。LLM在"综合"时可能会写成"双方对交付时间节点的认知存在分歧"——这句话看似中立，实际上已经<strong>回避了事实争议的核心</strong>：到底什么时候才算"知道"？这个时间点直接决定了违约责任的有无。</p>
+
+<p>在法律场景中，"回避事实争议"本身就是一种判断。它相当于说：这些争议不重要。但只有法官才有资格说这句话。</p>
+
+<div class="callout"><strong>要点：</strong>任何对矛盾叙述的"综合"都是隐式的事实认定。在严肃的信息分析场景中，你需要的是让矛盾可见，而不是让矛盾消失。</div>
+
+<h3>用Mosaic构建法律判例分析矩阵</h3>
+
+<p>研究者在Mosaic中构建了一个三源并列的法律分析矩阵。先看实体设计：</p>
+
+<table>
+  <thead>
+    <tr><th>实体类型</th><th>实体示例</th><th>跨源功能</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>当事人</td><td>原告（某科技公司）、被告（某供应链公司）</td><td>两份起诉/答辩文书对当事人的描述差异（如"业内领先企业"vs"缺乏行业经验的新进入者"）</td></tr>
+    <tr><td>关键证据</td><td>第3号合同附件、2023年3月往来邮件、4月技术参数确认函、第三方质检报告</td><td>控方采信/不采信 → 辩方采信/不采信 → 法官采信/不采信，形成三维标注</td></tr>
+    <tr><td>适用法条</td><td>《民法典》第577条（违约责任）、第147条（重大误解）、第584条（损失赔偿范围）</td><td>控辩双方对同一条文的解释完全不同</td></tr>
+    <tr><td>争议焦点</td><td>违约是否成立、合同条款是否存在重大误解、损失金额计算方式</td><td>每个争议焦点下面链接到三份文书中的对应论点和证据</td></tr>
+    <tr><td>时间线关键节点</td><td>合同签订日、首批交付日、争议通知日、诉讼提起日</td><td>不同来源对同一日期的描述差异</td></tr>
+  </tbody>
+</table>
+
+<h3>核心差异表：控方说 vs 辩方说 vs 法官说</h3>
+
+<p>下面是这个案件中关于"是否构成违约"这个核心争议焦点的Mosaic差异表：</p>
+
+<table>
+  <thead>
+    <tr><th>子议题</th><th>控方说（起诉状）</th><th>辩方说（答辩状）</th><th>法官说（判决书）</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>交付延迟的原因</strong></td><td>被告产能不足，承接了其他客户订单后挤占了原告的产能</td><td>原告在2023年3月临时修改了技术参数，导致需要重新采购核心部件，客观上无法在原定日期交付</td><td>"双方对技术参数修改与交付延迟之间的因果关系均未能提供充分证据，本院认为延迟交付系<strong>双方沟通不畅</strong>共同导致。"</td></tr>
+    <tr><td><strong>关键证据（3月邮件）的解读</strong></td><td>邮件中"我们会尽力协调"证明被告此时已意识到交付有问题，但没有及时告知原告</td><td>邮件中"我们会尽力协调"是常规商务用语，不能解读为对延迟的默认。同时邮件附件中明确附了修改后的时间表</td><td>"该邮件措辞含糊，不能单独作为认定被告违约的依据。邮件附件中的时间表修改未经双方签字确认，亦不能视为合同变更。"</td></tr>
+    <tr><td><strong>合同附件3的性质</strong></td><td>合同附件3是双方约定的交付标准，被告未达标构成违约</td><td>合同附件3仅是"参考性技术指标"而非"强制性交付标准"，合同正文第7.2条明确区分了两者</td><td>"合同正文第7.2条与附件3的表述存在不一致，应按照合同的整体解释确定双方真实意思……"（进入详细的合同解释分析）</td></tr>
+    <tr><td><strong>损失金额</strong></td><td>500万元（含直接损失300万 + 间接损失200万）</td><td>原告主张的间接损失缺乏因果关系证明；且原告自身也未采取合理减损措施</td><td>"支持直接损失80万元，间接损失40万元。原告在延迟发生后未及时寻找替代供应商，对损失扩大有一定责任，酌定减少20%。"</td></tr>
+  </tbody>
+</table>
+
+<h3>为什么Mosaic的方式在这里是"安全"的</h3>
+
+<p>如果你让LLM"综合"这个案子，它会做什么？它会尽量把三份文书的表述"融合"成一段话。但在这个融合过程中：</p>
+
+<ol>
+  <li><strong>控辩双方最尖锐的矛盾被"软化"了。</strong>"被告恶意违约"和"被告没有违约"变成"双方对违约性质存在不同看法"——这不是中立，这是消灭信息。</li>
+  <li><strong>法官的结论被隐式"背书"了。</strong>因为判决书是权威来源，AI在综合时会不自觉地向法官的叙述倾斜——但AI不应该替读者做这个倾斜。</li>
+  <li><strong>证据采信的差异被抹平了。</strong>控方说某封邮件是关键证据，辩方说同一封邮件不能说明任何问题——这是案件的命门，综合后它消失了。</li>
+</ol>
+
+<p>Mosaic的处理方式是：<strong>什么也不综合</strong>。三份文书并列，差异用颜色和标注高亮出来。读者自己看：控方怎么说，辩方怎么回应，法官最后怎么认定。每一句话都知道来自哪份文书。</p>
+
+<div class="compare">
+  <div class="compare-good"><strong>推荐：Mosaic的三源并列</strong><br>控方主张 → 辩方反驳 → 法官认定。三个叙述平行呈现，读者在比较中阅读。证据的采信与不采信在表格中一目了然。"法官说"只是其中一列，而非默认答案。</div>
+  <div class="compare-bad"><strong>不推荐：LLM综合</strong><br>"本案的核心争议在于被告是否构成违约……经审理……"——当你看到"经审理"这三个字的时候，你已经默认了法官的视角。而一个研究者的任务，恰恰是审视这个视角本身是否成立。</div>
+</div>
+
+<h3>从Mosaic到产出：庭审摘要和研究论文</h3>
+
+<p>Mosaic是输入层和分析层的工具，但研究最终需要产出。在这个案例中，研究者从Mosaic矩阵直接生成了两份产出：</p>
+
+<h4>产出1：庭审摘要</h4>
+
+<p>一份8页的庭审摘要，Mosaic在其中提供了完整的溯源支持。摘要中每一段关于案件事实的叙述，都以脚注形式链接回Mosaic中的具体源段。读者（比如一位合伙人律师）可以在认可一段叙述的同时，点开脚注看到同一事实在控方和辩方文书中的<strong>另一种说法</strong>。</p>
+
+<p>这在传统法律文书写作中几乎是做不到的——传统的"案情摘要"会直接告诉你"案件事实是A"，不会告诉你在另一份文书中案件事实被叙述为"非A"。</p>
+
+<h4>产出2：案例研究论文</h4>
+
+<p>一篇15000字的研究论文，主题是《合同条款解释中的"重大误解"认定标准》。研究者从Mosaic矩阵中提取了与"重大误解"相关的全部跨源讨论——控方如何论述不存在误解，辩方如何论证存在误解，法官如何依据合同整体解释原则做出判断。论文能够精确引用每一方的论点，并附上原始出处。审稿人可以顺着引用来验证论文中的每一项事实陈述。</p>
+
+<div class="tip"><strong>这个案例的核心教训：</strong>在法律、政策、商业等涉及"命题真值判断"的领域中，Mosaic的"不综合"原则不是一种审美偏好——它是一种<strong>安全机制</strong>。它能防止分析工具在你不注意的时候替你做了判断。</div>
+
+</div>
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part15"><span class="num">§15</span> 案例三：竞品情报分析 — 五份报告结论完全相反，你信谁？</h2>
+<p class="section-en">Case 3: Competitive Intelligence — Five Reports, Five Conclusions, Who Do You Trust?</p>
+<p class="section-intro">五份权威行业报告对同一个赛道的判断完全相反。"综合来看"是商业决策中最危险的一句话——因为你综合掉的，可能正是每份报告的隐藏立场和利益关系。</p>
+
+<h3>一个真实的商业困境</h3>
+
+<p>2026年秋天，一家消费品公司的战略部收到了五份关于中国植物蛋白饮料市场的行业报告：</p>
+
+<ol>
+  <li><strong>报告A：</strong>来自一家全球管理咨询公司，定价15万元。结论：市场处于高速增长期，建议加大投入。</li>
+  <li><strong>报告B：</strong>来自一家券商研究所，免费提供给客户。结论：市场增长放缓，头部品牌格局已定，新进入者机会有限。</li>
+  <li><strong>报告C：</strong>来自一家专注食品饮料的精品咨询公司，定价8万元。结论：细分品类（燕麦奶、巴旦木奶）仍有大机会，但传统豆奶天花板已到。</li>
+  <li><strong>报告D：</strong>来自一家行业协会委托的研究机构，公开免费。结论：市场稳定增长，但企业利润承压，需要政策扶持。</li>
+  <li><strong>报告E：</strong>来自一家投资机构的内部投研报告（非公开，通过渠道获取）。结论：赛道处于"泡沫前夜"，估值虚高，建议观望。</li>
+</ol>
+
+<p>战略部的分析师把五份报告读完后，在周一例会上说："五份报告的结论不太一致。"</p>
+
+<p>策略总监问："那综合来看呢？"</p>
+
+<p>分析师沉默了几秒，说："综合不了。"</p>
+
+<p>他说得对。</p>
+
+<div class="warning"><strong>为什么"综合"在商业决策中是致命的：</strong>行业报告不是自然科学论文。每一份报告都有——作者、出资方、发布时间、数据采集方式、目标受众、商业动机。把这些变量不一样的报告"综合"成一个结论，等于假设它们都是客观中立的。但商业世界里没有客观中立的报告。</div>
+
+<h3>Mosaic中的竞品情报分析矩阵</h3>
+
+<p>分析师在Mosaic中构建了一个五源情报分析矩阵。先看实体设计：</p>
+
+<table>
+  <thead>
+    <tr><th>实体维度</th><th>具体实体</th><th>Mosaic中追踪的内容</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>市场空间</td><td>总体市场规模、细分品类规模、增长率</td><td>五份报告对2026年市场规模的具体数字（最大差异：报告A说620亿，报告E说380亿，差了63%），以及每份报告的数据来源和方法论</td></tr>
+    <tr><td>竞争格局</td><td>CR5集中度、头部品牌份额、新进入者动态</td><td>同一品牌在不同报告中的市场份额数据差异——报告B说品牌X占28%，报告D说品牌X占22%（差异原因：统计口径不同）</td></tr>
+    <tr><td>增长驱动力</td><td>健康消费趋势、植物基替代、渠道下沉、餐饮B端</td><td>每份报告对"核心增长驱动"的判断完全不同——报告A押注"健康意识"，报告C押注"咖啡渠道"（燕麦奶拿铁的渗透率），报告E押注"渠道下沉"</td></tr>
+    <tr><td>风险因素</td><td>原料成本波动、品类替代风险、政策监管、消费者口味变化</td><td>报告D花了最多篇幅写利润下滑和成本压力（这恰好符合其委托方——行业协会——的利益诉求）；其他四份报告对这个维度的关注度明显更低</td></tr>
+    <tr><td>时间窗口</td><td>报告发布时间、数据采集截止时间</td><td>报告A发布于2026年1月（数据截至2025年Q3），报告E发布于2026年9月（数据截至2026年Q2）。六个月的时差可能解释部分结论差异</td></tr>
+  </tbody>
+</table>
+
+<h3>核心差异表：五份报告，五个世界</h3>
+
+<p>下面是分析师在Mosaic中构建的核心差异矩阵：</p>
+
+<table>
+  <thead>
+    <tr><th>判断维度</th><th>报告A<br>（咨询公司·2026.01）</th><th>报告B<br>（券商·2026.03）</th><th>报告C<br>（精品咨询·2026.06）</th><th>报告D<br>（行业协会·2026.07）</th><th>报告E<br>（投资机构·2026.09）</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>2026年市场规模</strong></td><td>620亿</td><td>480亿</td><td>505亿</td><td>520亿</td><td>380亿</td></tr>
+    <tr><td><strong>数据来源</strong></td><td>尼尔森零研数据 + 自建模型</td><td>上市公司年报 + 专家访谈(n=15)</td><td>线下抽样(n=2000) + 电商平台爬虫</td><td>会员企业自报数据 + 国家统计局</td><td>行业调研(n=45) + 企业尽调数据</td></tr>
+    <tr><td><strong>增长率判断</strong></td><td>年增22%（"高增长"）</td><td>年增8-10%（"增速放缓"）</td><td>整体增12%，细分增25%+（"结构性机会"）</td><td>量增6%，额增3%（"量增额降"）</td><td>年增15%，但估值已透支（"泡沫前夜"）</td></tr>
+    <tr><td><strong>隐式立场/利益</strong></td><td>🚩 付费客户可能正在考虑进入该赛道</td><td>🚩 覆盖多家该赛道上市公司，对存量标的更乐观</td><td>🚩 主营细分品类咨询，需要制造"新机会"叙事</td><td>🚩 委托方是行业协会，利益诉求偏向"行业困难"叙事（以争取政策）</td><td>🚩 自身有投后项目在该赛道，需要评估退出时点</td></tr>
+    <tr><td><strong>对核心增长驱动的判断</strong></td><td>消费升级 + 健康意识</td><td>渠道铺货 + 品牌营销</td><td>咖啡/茶饮B端渠道（燕麦奶拿铁）</td><td>三四线城市渗透 + 早餐场景</td><td>替代牛奶的结构性转移 + 海外市场</td></tr>
+    <tr><td><strong>首要风险</strong></td><td>消费者教育成本高</td><td>行业竞争加剧，利润率承压</td><td>原料（燕麦、巴旦木）进口依赖</td><td>价格战 + 中小企业生存困难</td><td>资本过热导致的估值泡沫</td></tr>
+  </tbody>
+</table>
+
+<div class="callout"><strong>看点：</strong>五份报告对"同一个市场"的规模估算从380亿到620亿，差了将近一倍。不是有人算错了——而是它们用了<strong>不同的统计口径</strong>（有没有算植物蛋白饮料的餐饮B端？有没有算即饮之外的冲调类？豆奶算不算？椰奶算不算？）。这些口径差异在Mosaic中被标注出来，而不是被一个"平均值"吞掉。</div>
+
+<h3>在Mosaic中发现"元信息"</h3>
+
+<p>当五份报告并列在眼前，分析师看到了比任何单一报告更重要的东西：</p>
+
+<p><strong>1. 利益关系的"影子"</strong></p>
+
+<p>报告D花了最大篇幅描述行业的困难和中小企业的生存危机——而它的委托方正是行业协会。报告B对存量上市公司的评价明显比其他报告更正面——因为它覆盖这些公司的股票。报告E是唯一强烈唱空的——但它自己的投后项目正在评估退出时机。</p>
+
+<p>这些信息在"综合"模式下会完全消失。但在Mosaic中，<strong>每份报告的立场背景被作为一个独立的元信息字段标注出来</strong>，读者在做商业判断时可以把这个因素考虑进去。</p>
+
+<p><strong>2. 时间维度的盲点</strong></p>
+
+<p>报告A发布于2026年1月（数据截至2025年Q3），报告E发布于2026年9月（数据截至2026年Q2）。六个月的时差，恰好横跨了2026年上半年的消费降级讨论。报告A看到的"高增长"和报告E看到的"泡沫前夜"，可能描述的是同一赛道在<strong>不同时间截面的状态</strong>。</p>
+
+<p>在Mosaic中，每条判断都带有它对应的发布时间和数据截止日期。"综合"会让人误以为五份报告在描述同一个时间点，但实际上它们是不同时间拍的快照。</p>
+
+<p><strong>3. "分歧本身"就是情报</strong></p>
+
+<div class="callout"><strong>关键洞察：</strong>五份专业机构对同一个市场做出完全相反的判断，这件事本身就是最有价值的竞争情报。它告诉你：这个市场还处于<strong>高度不确定的阶段</strong>——数据不透明、口径不统一、各方叙事受立场影响严重。在这个阶段，任何"确定性结论"都是危险的。Mosaic的价值恰恰在于保护这种"不确定"，而不是假装把它变成确定。</div>
+
+<h3>从Mosaic到战略决策建议</h3>
+
+<p>分析师从Mosaic矩阵中生成了给策略总监的决策建议书。建议书的结构完全不同于传统的"综合摘要"：</p>
+
+<ol>
+  <li><strong>不是"我们认为这个市场怎么样"</strong>——而是"五份报告分别认为这个市场怎么样，以及它们为什么可能是对的/错的"</li>
+  <li><strong>不是"行业规模是X亿"</strong>——而是"Mosaic显示，行业规模的定义本身存在显著分歧。在A口径下是620亿，在E口径下是380亿。建议公司内部先统一口径再做判断"</li>
+  <li><strong>不是"增长驱动力是Y"</strong>——而是"增长驱动力取决于你押注哪个场景。咖啡渠道（燕麦奶拿铁）和渠道下沉（三四线豆奶）是两条完全不同的增长曲线，五份报告对这两条曲线的权重判断截然相反"</li>
+  <li><strong>最重要的建议来自Mosaic本身的结构：</strong>建议公司在这五份报告之外，<strong>针对Mosaic暴露出的三个核心不确定性</strong>（市场口径定义、咖啡渠道渗透率、原料成本趋势），做一次独立的小规模验证调研。预算控制在30万元以内。</li>
+</ol>
+
+<div class="tip"><strong>这个案例的元教训：</strong>在商业情报分析中，Mosaic帮你做的最有价值的事，不是"找到正确答案"——而是<strong>看清问题本身有多不确定</strong>。五份报告打架这件事，本身就是你应该知道的、最关键的竞争情报。它意味着：如果你现在就下注，你是在赌，不是在判断。而Mosaic至少让你清楚地知道你在赌什么。</div>
+
+</div>
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part16"><span class="num">§16</span> 案例四：文学批评 — 五种眼光看同一本书，每一种都在揭示和遮蔽</h2>
+<p class="section-en">Case 4: Literary Criticism — Five Lenses on One Book, Each Revealing and Concealing</p>
+<p class="section-intro">五位评论家对同一部小说有五种截然不同的解读。在文学研究中，"综合"是最大的暴力——因为当你说"综合各派的观点"，你实际上在消解每一种批评流派的方法论根基。</p>
+
+<h3>一个根本不适合"综合"的领域</h3>
+
+<p>2026年，一位比较文学专业的研究生在准备毕业论文，主题是莫言《生死疲劳》中的叙事策略研究。她收集了五篇核心批评文章：</p>
+
+<table>
+  <thead>
+    <tr><th>批评文章</th><th>流派/视角</th><th>核心命题</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>批评A</td><td>叙事学/结构主义</td><td>六道轮回的叙事结构如何解构了传统线性时间观</td></tr>
+    <tr><td>批评B</td><td>女性主义批评</td><td>小说中女性形象的符号化与男性叙事对女性声音的遮蔽</td></tr>
+    <tr><td>批评C</td><td>后殖民批评</td><td>土地改革叙事的底层权力话语，以及东方农耕文明的现代性焦虑</td></tr>
+    <tr><td>批评D</td><td>精神分析批评</td><td>轮回叙事中的"未完成情结"与多代创伤的代际传递</td></tr>
+    <tr><td>批评E</td><td>生态批评</td><td>人与土地的关系——从占有到共生的叙事弧线，以及非人类中心视角的文本裂隙</td></tr>
+  </tbody>
+</table>
+
+<div class="callout"><strong>要点：</strong>这五种解读不是"从不同角度解释同一件事"——它们是<strong>在解释不同的"作品"</strong>。结构主义者眼中《生死疲劳》是一部关于叙事的作品，女性主义者眼中它是一部关于性别的作品，后殖民批评者眼中它是一部关于权力的作品。它们的底层预设完全不同，任何"综合"都会把这种不同强行抹平。</div>
+
+<p>如果说法律和商业场景中"综合"是一种危险，那么在文学批评中，"综合"就是一种<strong>误读</strong>。因为文学批评的价值恰恰在于不同视角之间的<strong>不可通约性</strong>——一个结构主义解读和一个女性主义解读，它们的矛盾不是"谁对谁错"，而是"你选择了用哪一副眼镜看世界"。</p>
+
+<h3>Mosaic中的文学批评矩阵</h3>
+
+<p>研究生在Mosaic中构建了一个五源批评矩阵。实体设计：</p>
+
+<table>
+  <thead>
+    <tr><th>实体类型</th><th>具体实体</th><th>跨源分析维度</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>人物</td><td>西门闹、蓝脸、西门宝凤、黄合作、蓝解放</td><td>五位评论家对同一个人物的解读差异——西门闹是"悲剧英雄"还是"男性中心主义的化身"？蓝脸是"土地伦理的坚守者"还是"历史进步的绊脚石"？</td></tr>
+    <tr><td>主题</td><td>轮回、土地、权力、记忆、创伤</td><td>同一主题在五种批评框架中的权重差异——"土地"在生态批评中是核心，在精神分析中几乎不出现</td></tr>
+    <tr><td>象征</td><td>六道轮回、驴牛猪狗、单干户的方田、集市</td><td>同一象征在不同流派中的解读——"六道轮回"在结构主义者眼中是叙事装置，在精神分析者眼中是创伤的循环</td></tr>
+    <tr><td>叙事技巧</td><td>多视角叙述、动物视角、时间跳跃、魔幻现实主义</td><td>不同流派关注的技巧层面——结构主义者关注视角切换的逻辑，女性主义者关注"谁在说"和"谁被说"</td></tr>
+  </tbody>
+</table>
+
+<h3>核心差异表：五位评论家对同一人物的五种解读</h3>
+
+<p>以小说核心人物"西门闹"为例，五位评论家给出了五种截然不同的画像：</p>
+
+<table>
+  <thead>
+    <tr><th>维度</th><th>叙事学（批评A）</th><th>女性主义（批评B）</th><th>后殖民（批评C）</th><th>精神分析（批评D）</th><th>生态批评（批评E）</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>西门闹的本质</strong></td><td>一个"不可靠叙事者"——他的轮回叙述是主观的、情绪化的、不可全信的。他是叙事策略的一部分，而非独立的人物。</td><td>一个典型的"男性中心悲剧英雄"——他的苦难叙事遮蔽了女性角色的声音。小说中女性几乎全部是被叙述的客体。</td><td>一个小地主在历史洪流中的悲剧——他的死亡和轮回象征着传统农耕秩序在现代性暴力下的崩溃。</td><td>一个"未完成哀悼"的主体——他被枪毙后的轮回是强迫性重复，每一次转世都是对"完成死亡"的失败尝试。</td><td>一个从"地主"到"动物"再到"土地的一部分"的蜕变——他的六道轮回是人类中心主义向生态整体主义的归位。</td></tr>
+    <tr><td><strong>轮回的意义</strong></td><td>叙事策略：提供多重视角和时间维度的叙事装置</td><td>男性权力的延续：即使变成动物，他仍然占据叙事者位置</td><td>历史循环的隐喻：暴力革命的轮回性质，底层叙事的苦难循环</td><td>创伤的强迫性重复：被压抑的愤怒和冤屈在轮回中不断重现</td><td>从占有到回归：从土地所有者变成土地的一部分，人与自然的和解</td></tr>
+    <tr><td><strong>空源标注</strong></td><td>—</td><td>没有讨论土地政策本身的性别维度</td><td>没有讨论小说中的魔幻元素形式</td><td>没有讨论叙事视角的技术性分析</td><td>较少讨论政治权力结构</td></tr>
+  </tbody>
+</table>
+
+<p>注意上表：每一位评论家对"空源标注"那一行的内容，恰恰就是<strong>他们批评框架的理论盲区</strong>。结构主义者不讨论性别，女性主义者不讨论形式，后殖民批评者不讨论叙事技术——每一种理论框架都在照亮一部分的同时遮蔽了另一部分。Mosaic让你同时看到这五个框架的<strong>照亮和遮蔽</strong>。</p>
+
+<h3>"在每一片碎片中看到整体"</h3>
+
+<p>研究生在Mosaic中工作时逐渐发现了一种奇妙的体验——她不是一个"中立的综合者"，而是一个在五个视角之间往返穿梭的旅行者。每一次切换到另一个批评流派的页面，她看到的小说都不一样。</p>
+
+<p>这种体验和看一本"文学批评综述"完全不同。综述会告诉你："叙事学认为……女性主义认为……后殖民批评认为……"它把这些视角并列变成了一段段脱水后的知识条目。但在Mosaic中，每一个视角都是<strong>完整的、独立的、可以深度沉浸的</strong>。你可以花一个小时在女性主义视角下重读小说中的女性人物片段，然后再切换到结构主义视角，用叙事学工具重新分析同一段文字。</p>
+
+<p>她给这种体验起了一个名字：<strong>"在碎片中做鱼"</strong>——在不同视角之间自由游动，不依附于任何一个，但不排斥任何一个。</p>
+
+<h3>从Mosaic到产出：一篇"透明立场"的文学评论</h3>
+
+<p>最终她写出一篇一万二千字的论文，标题是《作为叙事策略的轮回——以〈生死疲劳〉为中心》。这篇论文的特点是：</p>
+
+<p>她<strong>选择了叙事学作为自己的主要分析框架</strong>（她明确地、公开地站在了批评A的一边），但在论述过程中：</p>
+
+<ul>
+  <li>每提到一个叙事学概念（如"不可靠叙事者"），她都会在脚注中指出：这一概念在女性主义批评的框架下会被如何看待，在精神分析框架下又会被如何重新定义。</li>
+  <li>在分析人物时，她不只是用叙事学工具分析，还同时标注：同一个人物在不同批评框架下的解读差异。她没有试图"调和"，她只是诚实地告诉读者："我用这把尺子量出的是X，但我看到了别人用别的尺子量出的是Y和Z。"</li>
+  <li>她的论文不是"综合了五家之说"——而是"以一家为骨架，在关键节点标注其他四家的不同立场"。</li>
+</ul>
+
+<div class="compare">
+  <div class="compare-good"><strong>推荐：Mosaic赋能的学术写作</strong><br>"我选择叙事学作为本文的分析框架。这个选择的代价是本文不会深入涉及性别和生态维度——有兴趣的读者可另见批评B和批评E的相关讨论。下表列出了本文框架与另四个框架在关键概念上的定义差异，供交叉参考。"——立场清晰、素材透明、边界自省。</div>
+  <div class="compare-bad"><strong>不推荐：传统的不明立场"综述"</strong><br>"综合学界的研究成果，本文认为《生死疲劳》的叙事策略具有丰富的阐释空间……"——看完你不知道作者到底站在哪个立场，也不知道她排除了哪些视角。表面"全面"，实则虚焦。</div>
+</div>
+
+<h3>从这个案例中抽出来的方法论</h3>
+
+<p>文学批评案例展示了Mosaic在<strong>不可综合领域</strong>中的独特价值：</p>
+
+<ol>
+  <li><strong>视角本身就是信息。</strong>五个流派不是在"解释同一件作品"，而是在"建构五件不同的作品"。Mosaic保护这种建构性，而综合摧毁它。</li>
+  <li><strong>标注边界是学术诚实。</strong>每一个批评框架都有它的照亮和遮蔽。在Mosaic中声明"我用这个视角，代价是忽略了什么"，比假装自己"综合了所有视角"更诚实。</li>
+  <li><strong>"在碎片中自由移动"是一种能力。</strong>不是蜻蜓点水式地"涉猎五派"，而是在每个框架中都能沉浸进去，然后在框架之间来回切换。Mosaic的双栏模式和跨源跳转让这种切换变得自然。</li>
+  <li><strong>"透明立场"强于"虚假中立"。</strong>人文研究中的"客观综合"往往只是隐藏了自己的预设。Mosaic允许你站定立场——只要坦诚地告诉读者你的立场是什么，以及你排除了什么。</li>
+</ol>
+
+<div class="tip"><strong>终极洞察：</strong>文学批评是一种"视角的艺术"，在Mosaic中，这种艺术被结构化为可操作的信息架构。你不再是被动接受某种"权威解读"的读者，而是成为在多种解读之间自由穿梭的思考者。这也是Mosaic这个名字的含义——你可以看到每一片马赛克碎片，也可以看到它们拼在一起形成的整体图案。两种看法都有，切换权在你。</div>
+
+</div>
+
+<!-- ===== part06-advanced.html ===== -->
+<div class="content">
+
+<h2 class="section-title page-break" id="part17"><span class="num">§17</span> 从 3 个来源到 30 个：矩阵的复利效应</h2>
+<p class="section-en">From 3 Sources to 30: The Compounding Power of the Matrix</p>
+<p class="section-intro">当来源数量从个位数跳到两位数，Mosaic 矩阵的威力不再是线性的——每加一列，已有页面的信息价值多一个维度。但这股力量也带来真实的工程挑战。</p>
+
+<h3>17.1 三个来源 vs 十个来源：体验的质变</h3>
+
+<p>如果你只用了 3 个来源建了一个 Mosaic，你可能觉得它"挺好用，但也没那么夸张"。这很正常——三个来源的矩阵，差异视角还很单薄。每种实体最多有三种说法，你一眼就能看完差异栏，用不用 Mosaic 差距不大。</p>
+
+<p>十个来源的时候，事情就变了。</p>
+
+<p>假设你在研究苏东坡和佛印的关系。三个来源时，你看到：</p>
+
+<table>
+  <tr><th>来源</th><th>苏东坡 & 佛印的关系</th></tr>
+  <tr><td>传记 A</td><td>"至交好友，常相往来"</td></tr>
+  <tr><td>笔记 B</td><td>"亦师亦友的禅宗交游"</td></tr>
+  <tr><td>年谱 C</td><td>"地方官任上结识的僧侣之一"</td></tr>
+</table>
+
+<p>差别不大，你扫一眼就完事了。</p>
+
+<p>十个来源时，差异栏变成这样：</p>
+
+<table>
+  <tr><th>来源</th><th>苏东坡 & 佛印的关系</th></tr>
+  <tr><td>传记 A</td><td>"至交好友，常相往来"</td></tr>
+  <tr><td>笔记 B</td><td>"亦师亦友的禅宗交游"</td></tr>
+  <tr><td>年谱 C</td><td>"地方官任上结识的僧侣之一"</td></tr>
+  <tr><td>野史 D</td><td>"佛印实为虚构人物，南宋话本附会"</td></tr>
+  <tr><td>日本研究 E</td><td>"苏黄佛印三人构成北宋士大夫佛教的核心圈"</td></tr>
+  <tr><td>考证集 F</td><td>"交往约 15 年，可确定见面至少 7 次"</td></tr>
+  <tr><td>文学史 G</td><td>"一段被后人过度神话的友谊"</td></tr>
+  <tr><td>佛学研究 H</td><td>"苏对佛印的禅宗理解其实很浅"</td></tr>
+  <tr><td>散文集 I</td><td>"彼此视为另一个自己"</td></tr>
+  <tr><td>考古报告 J</td><td>"金山寺题壁显示佛印确有其人"</td></tr>
+</table>
+
+<p>现在你的脑力就不够了。十个来源呈现的不是"更多视角"，而是<strong>一个完整的叙事光谱</strong>——从"虚构人物"到"另一个自己"，中间有七八种灰度。你不可能靠记忆同时 tracking 这十种说法。</p>
+
+<div class="callout"><strong>要点：</strong>Mosaic 的价值阈值大约在 5-7 个来源。低于这个数，手动对比也凑合；超过这个数，矩阵的复利效应开始显现——你不再是在"看资料"，而是在"看资料之间的张力场"。</div>
+
+<h3>17.2 矩阵的 O(n) 扩展逻辑</h3>
+
+<p>外面很多人会说"多一个来源就多一倍的工作量"。在 Mosaic 里正好相反：<strong>每加一个来源，已有页面的价值是递增的，但编译工作量是递减的。</strong></p>
+
+<p>为什么？因为 entity-index 矩阵的结构是：</p>
+
+<pre><code>        来源1  来源2  来源3  ...  来源N
+实体A    ■      ■      □          ■
+实体B    □      ■      ■          □
+实体C    ■      □      ■          ■
+...</code></pre>
+
+<p>当你加第 N+1 个来源时，需要做的事只有：</p>
+
+<ol>
+  <li>把新来源喂给 AI 做全量扫描，提取 entity list</li>
+  <li>新实体直接新增行，已有实体更新新列</li>
+  <li>差异栏如果有新信息，补充标注</li>
+</ol>
+
+<p>这个过程中，<strong>新来源只接触一次</strong>。而已有的几百个实体页面，信息量因为多了一列而自动增值。你不需要回头去重读旧来源。</p>
+
+<p>这就是为什么说它是"复利"：早期投入在搭框架上的那点功夫，后续每次新来源进来都在自动产生回报。矩阵越大，你越不舍得扔掉任何一个来源。</p>
+
+<h3>17.3 叙事光谱：统一的、撕裂的、沉默的</h3>
+
+<p>当来源数量上来后，有一个特别有意思的现象值得专门聊一下：<strong>不同实体在不同来源中的"叙事一致性"是天差地别的。</strong></p>
+
+<p>我把它分成三种情况：</p>
+
+<h4>高一致型（叙事结晶）</h4>
+
+<p>某个实体的信息在所有来源中高度一致，几乎没有矛盾。这类实体说明该知识点已经"结晶"——学术界或行业共识已经形成。比如"鲁迅本名周树人"、"Node.js 基于 V8 引擎"。这种实体你不需要花太多脑力，差异栏基本是空白或只有细节差异。</p>
+
+<h4>中等分散型（正常态）</h4>
+
+<p>大部分实体属于这一类：有核心共识，但在解释、权重、侧重点上有差异。比如"辛亥革命的起因"，不同史学家强调的要素不同——经济因素、民族矛盾、新军起义、立宪派转向……没有谁错，但叙述重心不同。Mosaic 的差异栏在这里最有用。</p>
+
+<h4>低一致型（叙事撕裂）</h4>
+
+<p>这才是最有价值、也最危险的情况。某些实体在不同来源中的叙述几乎<strong>不相容</strong>。比如某个争议人物的生平，A 书说他是"民族英雄"，B 书说他是"投机分子"，C 书记载的时间线和前两本根本对不上。</p>
+
+<div class="warning">叙事撕裂的实体如果只读了一个来源就去写文章，你会以为你掌握了真相。实际上你只看到了光谱的一个端点。Mosaic 会让你看到整条光谱——它不会替你选边站，但它保证你不会无知地选边。</div>
+
+<p>实操上，你可以给 entity-index 加一个"一致性评分"列：</p>
+
+<pre><code>| 实体 | 类型 | 一致性 | 备注 |
+|------|------|--------|------|
+| 佛印 | 人物 | ★★☆☆☆ | 存废争议，来源 D 和 J 直接矛盾 |</code></pre>
+
+<p>一致性低不代表"这个实体不值得研究"——恰恰相反，它通常是<strong>最值得深挖的</strong>。</p>
+
+<h3>17.4 规模化挑战：当 grep 开始变慢</h3>
+
+<p>前面说的都是美好的部分。现在说现实问题：<strong>Mosaic 在页面量上来之后，会碰到性能瓶颈。</strong></p>
+
+<p>具体表现：</p>
+
+<ul>
+  <li><strong>wiki 页面超过 500 页</strong>：Obsidian 的全文搜索（grep）开始明显变慢，尤其在交叉引用密集的页面里做 ⌘+F</li>
+  <li><strong>entity-index 超过 1000 行</strong>：单文件在 Obsidian 里的渲染开始卡顿，编辑时输入有延迟</li>
+  <li><strong>来源超过 20 个</strong>：entity-index 的表格宽度太夸张，横向滚动体验很差</li>
+  <li><strong>块级引用累积</strong>：每个页面可能有几十个 📖 链接，批量检查死链变成体力活</li>
+</ul>
+
+<p>这些问题不是 Mosaic 设计缺陷，而是<strong>文本文件本身的物理限制</strong>。Obsidian 再强，底层也是对着文件系统做匹配，500 个 Markdown 文件的全文搜索卡顿是物理规律。</p>
+
+<div class="callout"><strong>要点：</strong>当你开始觉得"这东西慢得让人烦躁"，别怀疑自己，是你已经跑通了 Mosaic 的价值验证阶段，该考虑升级基础设施了。</div>
+
+<h3>17.5 扩展方案一：Binder — 结构化索引层</h3>
+
+<p>Binder 是我的第一个工程化尝试，思路很直接：</p>
+
+<p><strong>把 entity-index 从 Markdown 表格变成一个 SQLite 数据库。</strong></p>
+
+<div class="flow">
+  <div class="flow-item">Markdown 原文（不变）</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">Python 脚本解析 YAML frontmatter</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">写入 SQLite 索引表</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item">CLI / Alfred / Raycast 查询</div>
+</div>
+
+<p><strong>表结构设计：</strong></p>
+
+<pre><code>-- 实体表
+CREATE TABLE entities (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,            -- 实体名称
+  type TEXT,                     -- 人物/事件/概念/地点
+  consistency REAL,              -- 叙事一致性评分 0.0-1.0
+  source_count INTEGER,          -- 被多少来源提及
+  last_updated TEXT              -- 最后更新日期
+);
+
+-- 来源-实体关联表
+CREATE TABLE source_mentions (
+  entity_id INTEGER,
+  source_name TEXT NOT NULL,
+  block_id TEXT,                 -- 块级引用 ID
+  mention_section TEXT,          -- 在原文中的章节位置
+  summary TEXT,                  -- 该来源对此实体的核心表述（≤200字）
+  has_detail BOOLEAN DEFAULT 0,  -- 是否有详细论述（vs 一笔带过）
+  FOREIGN KEY (entity_id) REFERENCES entities(id)
+);
+
+-- 全文索引
+CREATE VIRTUAL TABLE entity_fts USING fts5(name, summary);
+</code></pre>
+
+<p><strong>Binder 解决了什么：</strong></p>
+
+<ul>
+  <li>查询延迟从 O(n) grep 降到 O(log n) 索引查找，几千个实体也毫秒级返回</li>
+  <li>不再受 Markdown 表格宽度的物理限制——来源再多，SQL 里只是一行新记录</li>
+  <li>可以做复杂查询："找出同时被来源 A 和 B 提及、但叙述矛盾的人物实体"</li>
+</ul>
+
+<p><strong>Binder 没解决的：</strong></p>
+
+<ul>
+  <li>你仍然需要手动维护 Obsidian 里的 Markdown 页面和 SQLite 索引之间的同步</li>
+  <li>块级引用的跳转依赖 Obsidian 的 URI scheme，不在 Obsidian 里打开就没法跳</li>
+  <li>SQL 查询返回的是结构化数据，不是可直接阅读的对比视图</li>
+</ul>
+
+<div class="tip"><strong>适用场景：</strong>你的 entity 数量在 500-3000 之间，来源在 10-30 个之间，主要痛点是"找东西慢"。Binder 的成本很低——一个 Python 脚本 + SQLite（零依赖），半小时能搭完。</div>
+
+<h3>17.6 扩展方案二：Knowledge Engine — 双层检索架构</h3>
+
+<p>如果你不只是"找东西慢"，而是需要<strong>对整套知识库做实时查询和语义对比</strong>——比如"把所有来源中对'甲午战争起因'的论述按立场排序"——那么 Binder 就不够了。你需要 Knowledge Engine。</p>
+
+<p>这已经不是 Obsidian 插件的范畴了，而是一个独立的检索服务。架构分两层：</p>
+
+<h4>维基层（Wiki Layer）</h4>
+
+<p>把 Mosaic 的 Markdown 页面（原文 + 编译页面）做结构化索引，每条记录包含：</p>
+
+<ul>
+  <li>实体名、类型、来源归属、块级引用 ID</li>
+  <li>嵌入向量（方便语义搜索"有没有哪个来源提到了 X 相关的话题"）</li>
+  <li>编译时提取的摘要字段</li>
+</ul>
+
+<p>索引引擎可选：<strong>Meilisearch</strong>（零配置，中文分词友好，REST API 开箱即用）或 <strong>Elasticsearch</strong>（如果你已经有 ES 集群）。</p>
+
+<h4>Memvid 层（记忆视图层）</h4>
+
+<p>这是 Knowledge Engine 的"灵魂层"。它不关心"哪个文件里写了什么"，而是回答："对于这个实体，<strong>各路说法之间的关系是什么</strong>？"</p>
+
+<p>技术实现上，Memvid 是一个轻量的查询引擎，维护了三张图：</p>
+
+<ul>
+  <li><strong>一致性子图：</strong>哪些来源对此实体的描述高度一致</li>
+  <li><strong>矛盾子图：</strong>哪些来源存在显式或隐性矛盾</li>
+  <li><strong>演化子图：</strong>如果来源有时序（如不同年份的论文），该实体的理解如何演变</li>
+</ul>
+
+<p>查询时，Memvid 不返回文档列表，而是返回<strong>结构化的对比视图</strong>——类似你在 Obsidian 里看到的差异栏，但是即时生成的、带排序的、支持任意组合的。</p>
+
+<pre><code># 典型查询示例
+$ ke query --entity="甲午战争起因" --dimension="立场" --threshold=0.3
+
+立场分布 (5 个来源):
+┌──────────────────────────────────────────────────┐
+│ ← "日本蓄谋已久" ──────── "清廷腐朽" ── "多重因素" → │
+│     来源A, C              来源D, E         来源B   │
+│                                                      │
+│ 矛盾标记: 来源A vs 来源D — 对"东学党起义的定性"完全相反 │
+└──────────────────────────────────────────────────┘
+</code></pre>
+
+<p><strong>性能基准：</strong>实测 2000 个实体、30 个来源的规模下，Memvid 层查询延迟 &lt;5ms（不含网络传输），维基层全文搜索 &lt;50ms。对比 Obsidian 里的 ⌘+Shift+F（同样规模 2-3 秒），这是两个世界。</p>
+
+<div class="warning">Knowledge Engine 需要一定的工程投入——不是装个插件的事。你需要跑一个索引服务、写实体提取和同步脚本、可能还要搭一个前端。适合已经确认 Mosaic 是核心工作流、且每天高频使用的用户。</div>
+
+<h3>17.7 升级决策：什么时候该动手</h3>
+
+<p>不是每个人都必须升级。以下是参考阈值：</p>
+
+<table>
+  <tr><th>指标</th><th>Obsidian 还够用</th><th>考虑 Binder</th><th>考虑 Knowledge Engine</th></tr>
+  <tr><td>Wiki 页面数</td><td>&lt; 300</td><td>300-1000</td><td>&gt; 1000</td></tr>
+  <tr><td>来源数</td><td>&lt; 8</td><td>8-25</td><td>&gt; 25</td></tr>
+  <tr><td>全文搜索延迟</td><td>&lt; 1s</td><td>1-3s</td><td>&gt; 3s</td></tr>
+  <tr><td>每天查询次数</td><td>&lt; 20</td><td>20-80</td><td>&gt; 80</td></tr>
+  <tr><td>查询复杂度</td><td>找某个实体</td><td>多条件筛选</td><td>语义对比 & 关系分析</td></tr>
+</table>
+
+<p>一句话判断：当你脑子里蹦出来的查询想法，Obsidian 的搜索框接不住的时候，就该升级了。</p>
+
+<h3>17.8 工具选型建议</h3>
+
+<p>不是推荐"最好的工具"，而是根据你的场景：</p>
+
+<table>
+  <tr><th>场景</th><th>推荐方案</th><th>备注</th></tr>
+  <tr><td>刚入门，不到 200 页</td><td>Obsidian 原生搜索</td><td>不需要额外工具，够用</td></tr>
+  <tr><td>300+ 页，查找慢</td><td>Binder (SQLite)</td><td>搭建成本 30 分钟，零运维</td></tr>
+  <tr><td>需要语义搜索</td><td>Binder + LanceDB</td><td>LanceDB 嵌入式向量库，不需要服务器</td></tr>
+  <tr><td>需要全文检索 + 多维度对比</td><td>Meilisearch + 自定义脚本</td><td>安装简单，中文分词好，有 Docker 镜像</td></tr>
+  <tr><td>全功能 Knowledge Engine</td><td>自建双层架构</td><td>建议等你的 Mosaic 稳定运行半年后再考虑</td></tr>
+  <tr><td>不需要离线，想最快体验</td><td>Obsidian + Copilot 插件</td><td>语义搜索 + 对话式查询，但依赖外部 API</td></tr>
+</table>
+
+<div class="tip"><strong>一个实用建议：</strong>不要在 Mosaic 还没跑出第一批价值的时候就急着搭 Knowledge Engine。用 Obsidian 原生搜索至少跑完一个完整的"资料收集→编译→差异标注→产出"循环，确认这套方法论真的适合你的领域，再考虑升级基础设施。过早优化是一切罪恶的根源——在知识管理领域尤甚。</div>
+
+</div>
+
+<div class="content">
+
+<h2 class="section-title page-break" id="part18"><span class="num">§18</span> Lint 审计与质量保障</h2>
+<p class="section-en">Lint Auditing and Quality Assurance</p>
+<p class="section-intro">多 Agent、多批次、多来源写出来的页面，跨页重复、链接腐烂、矛盾遗漏几乎是必然会出现的。Lint 审计不是"锦上添花"，而是让你的 Mosaic 从能用变成可信的最后一道工序。</p>
+
+<h3>18.1 为什么需要定期审计</h3>
+
+<p>让我们诚实一点：Mosaic 的本质是多源交叉编译，而编译过程有太多环节可能出问题。</p>
+
+<p>一个典型的问题场景：你用 Claude Code 写完了第一批 120 个实体页面，当时只有 5 个来源。三个月后，来源增加到了 12 个。新加入的来源 7 对"王安石变法"有大量论述，但你第一批写的"王安石变法"页面只引用了 5 个来源——6 个新来源的信息躺在 entity-index 里，没有回刷到页面中。</p>
+
+<p>更隐蔽的问题：两个 Agent 分别写了"苏轼的贬谪生涯"和"北宋流放制度"，两者都引用了来源 D 和来源 E，但对同一段历史给出了不同的年表。没有人故意写错——Agent A 用的是来源 D 的第三版，Agent B 用的是来源 D 的第二版。</p>
+
+<div class="callout"><strong>核心矛盾：</strong>Mosaic 的优势来自多源交叉验证，但多源交叉验证的可靠性，取决于每一条编译信息的准确性和时效性。没有审计的 Mosaic，看起来比单一来源更全面，实际上可能比单一来源更危险——因为它给了你一种"我已经看过所有视角"的虚假信心。</div>
+
+<h3>18.2 五项检查清单</h3>
+
+<p>每次 Lint 审计，按这五条逐项检查。可以手动做，也推荐写成一个 Claude Code prompt 让 AI 批量跑。</p>
+
+<h4>检查一：差异标注完整性</h4>
+
+<p><strong>核心问题：</strong>entity-index 里标记为"多源覆盖"的实体，在对应的编译页面中是否都有完整的差异表？</p>
+
+<p><strong>检查方法：</strong></p>
+
+<pre><code># 对 entity-index 做一次交叉对比
+# 找出所有"被 ≥2 个来源提及"的实体
+# 检查对应页面是否包含差异对比表（有 📖 块级引用才算通过）
+
+grep -l "差异对比" pages/*.md | wc -l    # 有差异表的页面数
+# 与 entity-index 中多源覆盖的实体数对比
+# 差距 >10% 属于黄灯，>20% 属于红灯
+</code></pre>
+
+<p><strong>常见漏报：</strong>一个实体在来源 A 中被重点讨论（有块引用），在来源 B 中只是顺带提到（被 AI 提取了但没写进差异表）。这种情况最容易漏——AI 觉得 B 的信息量不够写进对比，但实际上 B 的"一笔带过"本身就是有价值的信息（说明 B 的作者认为这个实体不重要）。</p>
+
+<h4>检查二：溯源链接有效性</h4>
+
+<p><strong>核心问题：</strong>所有 📖 块级引用链接是否还能正确跳转到原文的对应位置？</p>
+
+<p>块级引用的格式通常是：</p>
+
+<pre><code>📖 [[来源A-苏东坡传#^block-3a7f|苏东坡传 第3章]]
+</code></pre>
+
+<p>它依赖以下前提全部成立：</p>
+<ol>
+  <li>文件"来源A-苏东坡传.md"仍然存在</li>
+  <li>文件中存在 block ID 为 "^block-3a7f" 的段落</li>
+  <li>该段落的内容与编译页面的引用上下文一致</li>
+</ol>
+
+<p>任何一个断了，链接就是死链——你以为是"有据可查"，实际是"以为自己在引用"。</p>
+
+<p><strong>批量检查脚本思路：</strong></p>
+
+<pre><code>#!/bin/bash
+# 提取所有 📖 链接，检查目标文件是否存在
+# 更完整的版本应该用 Python 解析 Obsidian 的 block ID 并验证
+
+echo "=== 溯源链接审计 ==="
+for page in pages/*.md; do
+  # 提取 📖 后面的 wiki 链接
+  grep -oP '📖\s*\[\[.*?\]\]' "$page" | while read -r link; do
+    target=$(echo "$link" | grep -oP '\[\[\K[^#\|\]]+')
+    if [ ! -f "sources/$target.md" ]; then
+      echo "❌ 死链: $page → $target"
+    fi
+  done
+done
+</code></pre>
+
+<div class="tip">Obsidian 社区插件 <strong>"Broken Links"</strong> 可以自动扫描库内所有死链，包括块引用。装了就能用，不需要自己写脚本。</div>
+
+<h4>检查三：空源诚实度</h4>
+
+<p><strong>核心问题：</strong>差异表中标注为"未专门述及"的来源，是真的没有提及，还是 AI 漏扫了？</p>
+
+<p>这是最容易被忽视、也最危险的检查项。AI 全量扫描时可能因为以下原因漏掉某个来源对某实体的提及：</p>
+
+<ul>
+  <li>原文使用了实体名称的同义词或别称（如用"子瞻"而非"苏轼"）</li>
+  <li>实体信息嵌入在大段论述中，AI 的长文本注意力在中间衰减</li>
+  <li>原文结构混乱，实体信息分散在不同章节，AI 没有聚合到一起</li>
+</ul>
+
+<p><strong>检查方法：</strong></p>
+
+<pre><code># 抽查法（推荐，不需要全量跑）
+# 随机抽取 5% 的"未专门述及"标注
+# 对该实体的所有别名（从 entity-index 中获取）在原文中重新做全文搜索
+# 如果搜到了，但差异表标注了"未专门述及"→ 漏报
+
+# 举个例子：
+grep -i -r "子瞻\|东坡\|和仲" sources/来源G-XXX.md
+# 如果在来源G中搜到了"子瞻"，但该实体页面的差异表标注来源G"未专门述及"→ 漏报
+</code></pre>
+
+<p><strong>一个实操建议：</strong>在 entity-index 中给每个实体维护一个"别名列表"字段。AI 全量扫描时，强制它用所有别名去匹配，而不是只用主名称。</p>
+
+<h4>检查四：矛盾标注</h4>
+
+<p><strong>核心问题：</strong>当两个来源对同一实体给出了矛盾或冲突的叙述，差异表中是否<strong>显式标注</strong>了这种矛盾？</p>
+
+<p>AI 写差异表时，大概率只会<strong>罗列</strong>不同来源的表述，而不会主动<strong>标注矛盾</strong>。比如：</p>
+
+<div class="compare">
+<div class="compare-good"><strong>✅ 好的差异表：</strong><br><br>来源 A：赤壁之战发生于建安十三年（208 年）冬<br>来源 B：赤壁之战发生于建安十三年十二月<br><br>⚠️ <strong>矛盾：</strong>来源 B 的"十二月"可能是农历换算错误。汉代"冬"指十至十二月，A 说"冬"不排除十二月，B 说"十二月"则更精确但依据不明。建议回查《三国志·武帝纪》原始记载。</div>
+<div class="compare-bad"><strong>❌ 差的差异表：</strong><br><br>来源 A：赤壁之战发生于建安十三年冬<br>来源 B：赤壁之战发生于建安十三年十二月</div>
+</div>
+
+<p>后者看起来"列全了"，但没有帮助读者理解这两个说法在什么程度上冲突、冲突的根源在哪。这种差异表只是一个"摘抄列表"，不是"分析工具"。</p>
+
+<p><strong>批量提升方法：</strong>给 Claude Code 一个独立的 prompt，专门做"矛盾检测"——遍历所有差异标注了多源的实体，让 AI 逐对比较，发现冲突时在对应页面底部追加一个"⚠️ 未解决矛盾"区块。</p>
+
+<h4>检查五：新源回刷进度</h4>
+
+<p><strong>核心问题：</strong>新入库的来源，其信息是否已经回刷到已有的高价值实体页面中？</p>
+
+<p>这个检查最简单也最容易被拖延——"新来源我还没来得及回刷"是 Mosaic 维护者最常说的一句话。问题是你拖得越久，回刷的成本越高——因为你要追的回刷列表越来越长。</p>
+
+<p><strong>检查方法：</strong></p>
+
+<pre><code># 1. 列出最近入库的来源
+ls -lt sources/ | head -5
+
+# 2. 查看 entity-index，找出新来源中提及了哪些已有实体
+# 3. 对比这些实体的页面最后更新时间
+#    如果页面更新时间早于来源入库时间 → 未回刷
+
+# 简化版：让 AI 生成待回刷列表
+echo "扫描 sources/ 目录下最近 30 天内新增或更新过的文件，
+找出这些来源中提及的所有实体，
+检查对应页面是否有来自该来源的引用，
+输出一个 '待回刷清单'" | claude
+</code></pre>
+
+<h3>18.3 全书一致性审查</h3>
+
+<p>单项检查保证了每个页面内部的质量。但 Mosaic 是一个<strong>跨页面互联</strong>的系统——页面质量没问题，页面之间的关系仍可能出错。</p>
+
+<p>全书一致性审查聚焦三类问题：</p>
+
+<h4>跨章节重复</h4>
+
+<p>同一个实体可能出现在多篇文章中（比如"王安石变法"既出现在"王安石"页面中，也是"宋神宗"、"司马光"、"青苗法"等多个页面的内容主体）。不同的 Agent 在不同时间写这些页面时，很可能把同一段信息在不同页面中重复展开，<strong>说法还不完全一致</strong>。</p>
+
+<p><strong>解决方案：</strong>对内容做 cross-page 的 RAG 去重——把页面的核心论述做嵌入，检测语义相似度超过 85% 的段落，标记为"跨页重复"。然后决定是合并为引用链接，还是保持重复但统一措辞。</p>
+
+<h4>观点冲突</h4>
+
+<p>两个 Agent 分别写了两个页面，都引用了来源 A 和来源 B，但得出了不同的结论。这不是来源之间的矛盾（那是 Lint 检查四的范畴），而是<strong>编译过程引出的矛盾</strong>——Agent 对同一批资料的解读不一致。</p>
+
+<p><strong>解决方案：</strong>把你所有页面的结论性语句（通常是每个页面末尾的"总结" 或 "关键洞察"区块）提取出来，做聚类。如果两条结论讨论同一主题但立场相悖，人工判断是保留张力还是统一口径。</p>
+
+<h4>术语不一致</h4>
+
+<p>同一个概念在不同页面中被不同的 Agent 用不同术语描述。比如"块级引用"这个概念，在页面 A 中叫"块级引用"，页面 B 中叫"block 引用"，页面 C 中叫"块引用"。读者不知情会觉得是三件不同的事。</p>
+
+<p><strong>解决方案：</strong>维护一份"术语标准化词典"（放在 entity-index 的附录里），所有 Agent 写页面时查词典。Lint 时抽查 10% 的页面，检查标准术语使用率。</p>
+
+<h3>18.4 Lint 执行指令模板</h3>
+
+<p>把你实际要用的 prompt 模板贴在这里，直接改改就能跑。以下是用 Claude Code 执行一次完整 Lint 的指令：</p>
+
+<pre><code>你是 Mosaic 质量审计专家。请对当前 Mosaic 知识库执行一次完整的 Lint 审计。
+
+## 审计范围
+- Wiki 目录: pages/
+- 来源目录: sources/
+- 索引文件: entity-index.md
+
+## 执行以下检查，每项输出结果 + 问题清单
+
+### 检查 1: 差异标注完整性
+- 扫描 entity-index.md，找出所有被 ≥2 个来源提及的实体
+- 检查每个实体的编译页面是否包含差异对比表
+- 输出：遗漏列表（页面有实体但无差异表）
+
+### 检查 2: 溯源链接有效性
+- 扫描所有 pages/*.md 中的 📖 链接
+- 验证每个链接的目标文件是否存在、block ID 是否有效
+- 输出：死链列表
+
+### 检查 3: 空源诚实度（抽查）
+- 随机抽取 10 个标注了"未专门述及"的实体-来源对
+- 用实体的所有已知别名在该来源原文中搜索
+- 输出：漏报列表（搜到了但标注为"未专门述及"）
+
+### 检查 4: 矛盾标注
+- 遍历所有有多源差异表的实体
+- 检查差异表中是否存在显式矛盾标注
+- 输出：隐性矛盾列表（来源说法冲突但未标注）
+
+### 检查 5: 新源回刷进度
+- 找出最近 30 天内新增的来源文件
+- 列出新来源中提及的已有实体
+- 检查这些实体页面的最后更新时间
+- 输出：待回刷清单
+
+## 最终输出格式
+```markdown
+# Mosaic Lint 审计报告
+**审计日期:** YYYY-MM-DD
+**审计范围:** XX 个页面，XX 个来源，XX 个实体
+
+## 总分: X/100
+- 差异标注完整性: X/20
+- 溯源链接有效性: X/20
+- 空源诚实度: X/20
+- 矛盾标注: X/20
+- 新源回刷进度: X/20
+
+## 严重问题（必须立即修复）
+- [ ] ...
+
+## 一般问题（建议近期修复）
+- [ ] ...
+
+## 提示（可选改进）
+- [ ] ...
+```
+</code></pre>
+
+<h3>18.5 审计频率建议</h3>
+
+<p>审计频率取决于你的 Mosaic 活跃程度：</p>
+
+<table>
+  <tr><th>活跃度</th><th>特征</th><th>建议频率</th><th>审计范围</th></tr>
+  <tr><td>活跃</td><td>每周新增 ≥3 个来源或 ≥20 个实体</td><td>每两周全量 Lint</td><td>五项全覆盖</td></tr>
+  <tr><td>正常</td><td>每月新增 1-2 个来源</td><td>每月全量 Lint</td><td>五项全覆盖</td></tr>
+  <tr><td>低维护</td><td>来源稳定，偶尔添加新实体</td><td>每季度全量 + 每月快速检查</td><td>全量时五项覆盖，快速检查只做检查 2+5</td></tr>
+  <tr><td>休眠</td><td>超过 2 个月无新增</td><td>使用前做一次快速检查</td><td>检查 2（链接有效性）</td></tr>
+</table>
+
+<div class="tip"><strong>自动化思路：</strong>如果你已经把 entity-index 迁移到了 SQLite（§17.5 的 Binder），可以把检查 2（死链检测）和检查 5（新源回刷）完全自动化。写一个 cron job 每周跑一次，有新问题发通知。检查 1、3、4 仍然需要 LLM 介入，但可以预定一个日历提醒，到时间了把 prompt 扔给 Claude Code 就行。</div>
+
+<h3>18.6 审计报告存档</h3>
+
+<p>每次审计的报告不要丢，存在 <code>lint-reports/</code> 目录下，命名包含日期——这样你可以追踪质量趋势：</p>
+
+<pre><code>lint-reports/
+├── 2026-07-01-lint.md    # 总分 78 → 链接完整性问题，已修复
+├── 2026-06-15-lint.md    # 总分 82 → 空源标注漏报 3 处
+├── 2026-06-01-lint.md    # 总分 71 → 首次审计，问题较多
+├── 2026-05-15-lint.md    # 总分 65 → 新源回刷严重滞后
+</code></pre>
+
+<p>更重要的是，每次审计后务必<strong>把发现的问题修掉再继续写新页面</strong>。带着已知问题往前冲，债务会利滚利——20 个死链你今天不修，两个月后变成 80 个死链，修复成本翻四倍。</p>
+
+<div class="warning">Lint 审计不是你 Mosaic 的"可选升级"，它是你 Mosaic 的免疫系统。一个没有 Lint 习惯的 Mosaic，三个月后你打开任何一个页面都不敢信——因为你不知道里面的引用还活着没有、新来源的信息补没补、标注的空白是不是真的空白。</div>
+
+</div>
+
+<!-- ===== 99-backpage.html ===== -->
+<div class="back-page">
+  <div class="back-page-title">LLM Mosaic 从入门到精通</div>
+  <div class="back-page-subtitle">用大语言模型做多源互证的知识组织</div>
+  <div class="back-page-info">
+    <strong>亲爱的马拉亚</strong><br>
+    AI Native Coder，橙皮书系列作者。<br>
+    始终相信：AI 生成内容不稀缺，稀缺的是判断力。<br>
+    多源并列、逐条溯源——把判断权留给你自己。
+  </div>
+  <div class="back-page-social">
+    <span>公众号：亲爱的马拉亚</span>
+    <span class="social-sep">·</span>
+    <span>B站：亲爱的马拉亚</span>
+    <span class="social-sep">·</span>
+    <span>X：@马拉亚</span>
+    <span class="social-sep">·</span>
+    <span>官网：malaya.ai</span>
+  </div>
+  <div class="back-page-footer">
+    Created by 亲爱的马拉亚 · v260709 · 2026年<br>
+    本书内容仅供参考，不构成任何专业建议。
+  </div>
+</div>
+
+</body>
+</html>
